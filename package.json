@@ -5,7 +5,7 @@
   "main": "spike-history.js",
   "scripts": {
     "spike": "node spike-history.js",
-    "test": "node test/header.test.js"
+    "test": "node test/header.test.js && node test/classify.test.js"
   },
   "keywords": [],
   "author": "",

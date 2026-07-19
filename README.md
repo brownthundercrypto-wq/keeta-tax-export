@@ -1,10 +1,41 @@
 # Keeta Tax Export
 
+[![test](https://github.com/brownthundercrypto-wq/keeta-tax-export/actions/workflows/test.yml/badge.svg)](https://github.com/brownthundercrypto-wq/keeta-tax-export/actions/workflows/test.yml)
+
 Export your Keeta (KTA) transaction history to a CSV you can import into
 CoinLedger. Runs entirely in your browser, or as a local command-line tool.
 
 **You paste a public address. Nothing else.** No seed phrase, no private key, no
 account, no server.
+
+**Live tool:** https://brownthundercrypto-wq.github.io/keeta-tax-export/
+
+> **v0.1.0.** Tested against Keeta mainnet and `@keetanetwork/keetanet-client`
+> **0.18.3** on **19 July 2026**. If you are reading this much later, check that
+> the SDK has not moved. See
+> [KEETA-TECHNICAL-FINDINGS.md](KEETA-TECHNICAL-FINDINGS.md) for what was
+> verified and how.
+
+## What this does not do
+
+**This builds an import file. It does not calculate your cost basis, and it does
+not give you a finished tax return.**
+
+One Keeta address cannot tell you three things you need:
+
+- **What you paid.** The chain records that KTA moved, not what it cost you.
+- **Which wallets are yours.** Moving KTA between your own addresses is not a
+  sale, but on-chain it looks the same as one.
+- **Anything that happened off Keeta.** Exchange buys, other chains, transfers in
+  from somewhere else. None of it is here.
+
+Your tax software fills those gaps once you import the rest of your accounts.
+That is the job this file feeds into, not the job it finishes.
+
+## See what you get first
+
+[`examples/`](examples/) has a real CSV and its review file, generated from a
+public address off the block explorer. Look at those before pasting anything.
 
 ---
 

@@ -1,0 +1,31 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned to the version this was developed and verified against.
+      # The tool does bigint arithmetic that decides tax figures, so the
+      # runtime is not a detail worth leaving to chance.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+          cache: npm
+
+      # npm ci, not npm install: installs exactly what package-lock.json
+      # pins. The SDK version is what every finding in this repo was
+      # verified against.
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test

@@ -60,6 +60,7 @@
   hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
   a { color: var(--accent); }
   .byline { color: var(--muted); font-size: 14px; margin-top: 32px; }
+  .version { color: var(--muted); font-size: 13px; margin: -18px 0 24px; }
 </style>
 </head>
 <body>
@@ -67,6 +68,9 @@
 
   <h1>Keeta Tax Export</h1>
   <p class="sub">Turn your Keeta (KTA) transaction history into a CSV you can import into CoinLedger. Runs entirely in your browser.</p>
+  <p class="version">v0.1.0. Tested against Keeta mainnet and
+     <code>@keetanetwork/keetanet-client</code> 0.18.3 on 19 July 2026.
+     If you are reading this much later, check that the SDK has not moved.</p>
 
   <!-- ===================== STATE 1: INPUT ===================== -->
   <section id="state-input">
@@ -79,6 +83,12 @@
         This only accepts a <strong>public address</strong>. It's the same one you would give
         someone so they can send you KTA. It never asks for a seed phrase or private key, and
         cannot use one. Nothing you type here is sent to us. There is no server.
+      </p>
+      <p class="note">
+        Want to see what you get first?
+        <a href="https://github.com/brownthundercrypto-wq/keeta-tax-export/tree/main/examples"
+           rel="noopener" target="_blank">Look at a real CSV and review file</a>
+        before pasting anything. Both were generated from public addresses off the block explorer.
       </p>
       <div id="input-error" class="bad hidden"></div>
     </div>
@@ -183,6 +193,22 @@
   <h2>Read the code</h2>
   <p>Don't trust us. Read it.
      <a id="repo-link" href="https://github.com/brownthundercrypto-wq/keeta-tax-export" rel="noopener" target="_blank">GitHub repository</a></p>
+
+  <div class="warn">
+    <h3 style="margin-top:0">What this does not do</h3>
+    <p><strong>This builds an import file. It does not calculate your cost basis, and it does not
+       give you a finished tax return.</strong></p>
+    <p>One Keeta address cannot tell you three things you need:</p>
+    <ul>
+      <li><strong>What you paid.</strong> The chain records that KTA moved, not what it cost you.</li>
+      <li><strong>Which wallets are yours.</strong> Moving KTA between your own addresses is not a
+          sale, but on-chain it looks the same as one.</li>
+      <li><strong>Anything that happened off Keeta.</strong> Exchange buys, other chains, transfers
+          in from somewhere else. None of it is here.</li>
+    </ul>
+    <p>Your tax software fills those gaps once you import the rest of your accounts. That is the
+       job this file feeds into, not the job it finishes.</p>
+  </div>
 
   <div class="card">
     <h3 style="margin-top:0">Disclaimer</h3>
