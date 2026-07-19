@@ -6,7 +6,7 @@ This file lists every transaction the converter could **not** classify with conf
 
 - Account: `keeta_aab5qz62ifv77udwkziftaeea2isqk6v2qat27feoudcmcc5kw3uw2gu5kpk72i`
 - Network: main (network id 0x5382)
-- Generated: 2026-07-19T20:11:08.753Z
+- Generated: 2026-07-19T20:44:40.004Z
 - Staples fetched: 3045
 - Rows written to CSV: 3045
 - Excluded from CSV: 0

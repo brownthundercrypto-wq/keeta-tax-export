@@ -134,27 +134,73 @@ truth, not the article.
 
 ---
 
-# 2. Token decimals: there is no on-chain source
+# 2. Token decimals: they ARE on-chain, in `info.metadata`
 
-**This is the highest-severity correctness issue for anything that displays
-amounts.**
+> **CORRECTED 20 July 2026.** An earlier version of this document said Keeta
+> publishes decimals nowhere on-chain, and that every token had empty metadata.
+> **That was wrong.** The cause is a gotcha worth documenting in its own right,
+> so it is kept below rather than quietly deleted. If you read the earlier
+> version and built an off-chain registry around it, you do not need one.
 
-Amounts are `bigint` base units. Converting to a human-readable figure needs a
-divisor, and **Keeta publishes decimal precision nowhere on-chain.**
+Amounts are `bigint` base units, so converting to a human-readable figure needs
+a divisor. **Every token checked publishes its own divisor on-chain.**
 
-Every route checked **[SOURCE]** / **[DATA]**:
+```js
+const st = await client.state({ account: tokenAccount });
+const info = st.info;                                  // NOTE: st.info, not st
+const meta = JSON.parse(Buffer.from(info.metadata, 'base64').toString('utf8'));
+meta.decimalPlaces;                                    // -> 6 for USDC
+```
 
-- `TokenAccountInfo` → `account, name, description, metadata, defaultPermission?, supply`. **No decimals.**
-- `Config.getDefaultConfig('main')` → `networkAlias, network, initialTrustedAccount, representatives, validation, publishAidURL`. **No base token entry.**
-- `client.baseToken` → an `Account` object, methods only.
-- `BaseTokenInfo.decimalPlaces` exists but is a **genesis input**, not queryable at runtime.
-- Live metadata endpoint → contains 13 `decimalPlaces` values, but **all are for EVM assets** on the foreign side of bridge configs. **Zero for native `keeta_…` tokens.**
+`info.metadata` is a base64-encoded JSON object. Observed keys are
+`decimalPlaces` and sometimes `logoURI`. `info.name` carries the ticker and
+`info.description` a human-readable name.
 
-**Observed in production:** across 9 distinct tokens on a real wallet, **every
-single one had an empty `name` and empty `metadata`** **[DATA]**. Including the
-base token. The gap is total, not theoretical.
+## The bug that caused the wrong finding
 
-### The divisor is network-dependent
+`client.state()` does **not** return the account info directly. It returns a
+wrapper **[SOURCE]**:
+
+```
+{ account, currentHeadBlock, currentHeadBlockHeight, representative, info, balances }
+```
+
+Reading `.name` or `.metadata` off that wrapper yields `undefined` for every
+token, with no error. It looks exactly like a chain that publishes nothing. The
+fields live one level down, on `.info`.
+
+**This is the same family of trap as `publicKeyString` and `isReceive` elsewhere
+in this document: an SDK shape that degrades into a plausible-looking wrong
+answer instead of throwing.** If a Keeta lookup appears to return "nothing",
+check you are reading the right level before concluding the chain is empty.
+
+## Verification
+
+Every token in the AnchorFactory registry, checked three ways: the registry's
+claim, the on-chain `decimalPlaces`, and a real transaction reconciled against
+explorer.keeta.com **[DATA]**.
+
+| Token | Registry | On-chain | Raw sample | Computed | Explorer shows | Match |
+|---|---|---|---|---|---|---|
+| KTA | 18 | 18 | `10000000000000000000` | 10 | `10 KTA` | yes |
+| USDC | 6 | 6 | `2797489383` | 2797.489383 | `2,797.489383 USDC` | yes |
+| EURC | 6 | 6 | `459010000` | 459.01 | `459.01 EURC` | yes |
+| CBBTC | 8 | 8 | `30000` | 0.0003 | `0.0003 CBBTC` | yes |
+| USD | 2 | 2 | `149775` | 1497.75 | `1,497.75 USD` | yes |
+| EUR | 2 | 2 | `2272` | 22.72 | `22.72 EUR` | yes |
+| GBP | 2 | 2 | `7442` | 74.42 | `74.42 GBP` | yes |
+| CAD | 2 | 2 | `12593` | 125.93 | `125.93 CAD` | yes |
+| **JPY** | **0** | **0** | `4814` | 4814 | `4,814 JPY` | yes |
+| HKD | 2 | 2 | `7800` | 78.00 | `78 HKD` | yes |
+| MXN | 2 | 2 | `16703` | 167.03 | `167.03 MXN` | yes |
+| CNY | 2 | 2 | `13512` | 135.12 | `135.12 CNY` | yes |
+| AED | 2 | 2 | `36359` | 363.59 | `363.59 AED` | yes |
+
+Tokens outside the registry publish decimals too: MURF 18, **CHTA 9**, LUCKY 18,
+MKTA 18, LP_KTA_MURF 18 **[DATA]**. CHTA at 9 matters, because it shows the value
+genuinely varies and a hardcoded 18 would be wrong.
+
+## The divisor is still network-dependent
 
 | | Mainnet | Testnet |
 |---|---|---|
@@ -163,39 +209,32 @@ base token. The gap is total, not theoretical.
 | **KTA decimals** | **18** | **9** |
 
 Develop against testnet, ship against mainnet, and every amount is wrong by
-**10⁹**, silently. Derive the divisor from the network identifier, and assert
-that fetched blocks carry the network ID you expect before trusting any figure.
+**10⁹**, silently. Assert that fetched blocks carry the network ID you expect
+before trusting any figure.
 
-KTA = 18 on mainnet is **confirmed against the explorer** across 19 orders of
-magnitude **[DATA]**:
+## What to do
 
-| Raw base units | At 10^18 | Explorer shows |
-|---|---|---|
-| `1` | 0.000000000000000001 | `0.000000000000000001 KTA` |
-| `50000000000000000` | 0.05 | `0.05 KTA` |
-| `10000000000000000000` | 10 | `10 KTA` |
+**Read `decimalPlaces` from `info.metadata`.** It is authoritative, per-token,
+and removes any dependency on a third-party table.
 
-### What to do about it
+Three rules still apply:
 
-Decimals must come from a maintained off-chain registry. Every code example in
-the ecosystem hardcodes them. Bridge implementations ship a hand-written
-`TOKEN_MAP` and never derive decimals from chain.
+- **`0` is a real value.** JPY has 0 decimals. Any "falsy means missing" check
+  corrupts it. `0` and `undefined` must stay distinct.
+- **Still hard-fail when metadata is missing or unparseable.** Nothing forces an
+  issuer to set it. A token with no readable divisor has no safe default, and
+  guessing 18 produces a plausible, wrong number.
+- **A divisor is not an identity.** Knowing a token has 2 decimals does not make
+  it safe to label `USD`. A Keeta-native tokenized dollar and the actual US
+  dollar are not the same asset, and tax software that resolves the ticker to
+  fiat will silently misprice it.
 
-A useful registry (KTA 18, USDC 6, EURC 6, cbBTC 8, on-chain fiat tokens 2, and
-`$JPY` **0**) is published at
-`theanchorfactory.com/docs/reference/network-constants`. It is third-party, but
-it cross-validated three-for-three against real chain data (KTA address, network
-ID `0x5382`, chain location `21378`).
-
-Two traps in any such table:
-
-- **`$JPY` has 0 decimals.** Any "falsy means missing" check corrupts it. `0` and `undefined` must be distinct.
-- **Unknown tokens must hard-fail.** A token not in your registry has no
-  discoverable divisor. Guessing 18 produces a plausible, wrong number. Refuse
-  and surface it.
+An off-chain table is still useful as a **cross-check** against the chain, but it
+is no longer the source of truth. Worth knowing that the AnchorFactory table
+carries at least one transcription error: its HKD address is 62 characters where
+every other address is 61, and the SDK rejects it outright.
 
 ---
-
 # 3. Atomic swaps: the structure is not what the docs imply
 
 Documentation describes a swap as `SEND` + `RECEIVE` in one block. That is true,
@@ -365,6 +404,18 @@ client-side app is viable.
 files, a top-level `function foo` in one and `const foo` in another is a
 *parse-time* `SyntaxError`. The second file silently never registers, with no
 console error. Wrap each file in an IIFE.
+
+**Keeta tickers collide with real-world assets, and a divisor will not save
+you.** Several on-chain tokens set `info.name` to a sovereign currency code:
+`USD`, `EUR`, `JPY`, `GBP`, `CAD`, `HKD`, `MXN`, `CNY`, `AED` **[DATA]**. These
+are Keeta-native tokenized representations, not the currencies themselves.
+`CBBTC` is a bridged representation of BTC, not BTC.
+
+If you feed those tickers into anything that resolves symbols to assets, expect
+it to resolve them to the real thing and price accordingly. Reading the correct
+decimals does not help: the amount will be right and the asset will be wrong,
+which is harder to notice than a broken number. Anything consuming these tokens
+needs a deliberate naming decision, not a passthrough of `info.name`.
 
 ---
 

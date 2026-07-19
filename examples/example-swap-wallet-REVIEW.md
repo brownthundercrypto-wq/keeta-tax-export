@@ -6,7 +6,7 @@ This file lists every transaction the converter could **not** classify with conf
 
 - Account: `keeta_aabva3ph7du7vxsjlixr3pgzxyvseizddgxzj7uwzixvvlv2tuewaquqkerc24i`
 - Network: main (network id 0x5382)
-- Generated: 2026-07-19T19:59:16.807Z
+- Generated: 2026-07-19T20:42:31.673Z
 - Staples fetched: 2008
 - Rows written to CSV: 7
 - Excluded from CSV: 2001
@@ -247,7 +247,9 @@ _…and 1765 more of the same kind._
 
 ## non-KTA token, decimals not resolvable, refusing to guess  (26)
 
-These moved a **single non-KTA token**. Keeta does not publish decimal precision on-chain for tokens. Every token checked had empty metadata, so the tool cannot know whether a raw value means 1.0 or 0.000000001. Rather than guess a divisor and silently put a wrong number in your tax return, it refuses these rows.
+These moved a **single non-KTA token**. This version exports KTA only, because KTA is the one asset checked end to end: reconciled against the block explorer and imported into a real tax account without errors.
+
+The risk with the others is not the amount, it is the label. Several Keeta tokens use tickers like `USD`, `EUR` and `JPY`, which tax software is likely to read as actual currency rather than a token on Keeta. That kind of mistake is worse than a missing row, because the number still looks reasonable. So these are listed here with their transaction hashes and left for you to handle.
 
 | Staple hash | Date (UTC) | Detail |
 |---|---|---|

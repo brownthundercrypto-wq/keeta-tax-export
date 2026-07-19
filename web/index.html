@@ -68,7 +68,7 @@
 
   <h1>Keeta Tax Export</h1>
   <p class="sub">Turn your Keeta (KTA) transaction history into a CSV you can import into CoinLedger. Runs entirely in your browser.</p>
-  <p class="version">v0.1.0. Tested against Keeta mainnet and
+  <p class="version">v0.1.1. Tested against Keeta mainnet and
      <code>@keetanetwork/keetanet-client</code> 0.18.3 on 19 July 2026.
      If you are reading this much later, check that the SDK has not moved.</p>
 
@@ -184,11 +184,15 @@
   <h2>Why only KTA?</h2>
   <p>This version exports KTA only. If your wallet holds other Keeta tokens, those transactions are
      <strong>detected and deliberately left out</strong>, and listed in your review notes.</p>
-  <p>That is a correctness decision, not a missing feature. Keeta does not publish a token's decimal
-     precision on-chain. Every token we checked had empty metadata. Without that, a raw number could
-     mean <code>1.0</code> or <code>0.000000001</code>. Guessing wrong would put a silently wrong
-     figure in your tax return. We would rather leave a row out and tell you than quietly get it
-     wrong.</p>
+  <p>The reason is simple: <strong>KTA is what has been checked end to end.</strong> Its amounts were
+     reconciled against the block explorer, and a full export was imported into a real CoinLedger
+     account with zero errors. Nothing else has been through that.</p>
+  <p>Other tokens raise questions this version does not answer. Several Keeta tokens use tickers like
+     <code>USD</code>, <code>EUR</code> and <code>JPY</code>, which tax software is likely to read as
+     actual currency rather than a token on Keeta. Getting that wrong is worse than leaving a row
+     out, because the number looks perfectly reasonable.</p>
+  <p>So the excluded rows are listed with their transaction hashes and left for you, rather than
+     guessed at. Support may widen once each token has been checked the same way KTA was.</p>
 
   <h2>Read the code</h2>
   <p>Don't trust us. Read it.

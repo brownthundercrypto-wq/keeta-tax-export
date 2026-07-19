@@ -1,14 +1,19 @@
 {
   "_README": "Known Keeta mainnet addresses used to classify transactions that would otherwise be mis-reported. Every entry MUST carry a `source` and a `verified` flag. Nothing goes in here unverified-and-unmarked. See FINDINGS.md 'Gate 3' for method.",
-  "_generated": "2026-07-19",
+  "_generated": "2026-07-20",
   "_network": "main",
   "_networkId": "0x5382",
+  "_decimalsNote": "Decimals are published ON-CHAIN in each token account info.metadata (base64 JSON, key decimalPlaces). Read them from the chain. This table is a cross-check, not the source of truth.",
+  "_corrections": [
+    "2026-07-20: $HKD address had 62 characters where every other address has 61 (an extra f: apbnf7f34 vs apbn7f34). The SDK rejected it with \"Key is the wrong length (62)\". Corrected against the live metadata endpoint at static.network.keeta.com/metadata/services, then verified on-chain: info.name=HKD, decimalPlaces=2, and a real transfer of raw 7800 renders as \"78 HKD\" on explorer.keeta.com.",
+    "2026-07-20: cbBTC symbol corrected to CBBTC, which is what the token sets in info.name on-chain and what explorer.keeta.com displays.",
+    "2026-07-20: every decimals value in this file was verified three ways: this table, the on-chain decimalPlaces in the token account info.metadata, and a real transaction reconciled against explorer.keeta.com. All 13 agree. See KEETA-TECHNICAL-FINDINGS.md section 2."
+  ],
   "_sources": {
     "live-metadata": "https://static.network.keeta.com/metadata/services (fetched 2026-07-19; enumerated all keeta_ addresses by walking the JSON)",
     "network-constants": "https://theanchorfactory.com/docs/reference/network-constants (AnchorFactory, Jun 28 2026, v1). Local copy: Desktop/keeta/network constants.pdf",
     "observed-onchain": "Derived from output/history-raw.json dumps of real mainnet accounts. Identity INFERRED from on-chain behaviour, not asserted by any registry."
   },
-
   "bridgeAnchors": [
     {
       "address": "keeta_aabxhnduaeufydtuli6vntoaqzxcohfnj2nchffwmiuifcv4petkpfo65rgnasy",
@@ -29,7 +34,6 @@
       "note": "Declared as the anchor account for the 'keeta' assetMovement service. Bridges to Base/EVM per its locationMetadata."
     }
   ],
-
   "otherAnchors": [
     {
       "address": "keeta_aabebp7fnxqaerlcltetpayqgr3wxexdq5wfsuxi6xoakvbl2qmcvjrquhzaixq",
@@ -41,7 +45,6 @@
       "note": "NOT a bridge. Storage anchor. Listed so it is not mistaken for one; storage data is off-chain so it should generate no financial operations."
     }
   ],
-
   "swapInfrastructure": [
     {
       "address": "keeta_aabo73bnm3ss6rsooiq7dnke3muqy73pi2menjkg27evk2fb77asmsq75vkldqa",
@@ -60,34 +63,112 @@
       "note": "UNVERIFIED IDENTITY. Received three same-staple KTA sends (0.07, 0.077, 0.05) alongside a swap, then fanned 0.00206 KTA out to four further addresses. Behaviour is consistent with a routing/aggregator fee collector. These sends are part of the trade and must NOT be emitted as standalone withdrawals."
     }
   ],
-
   "tokens": [
-    { "address": "keeta_anqdilpazdekdu4acw65fj7smltcp26wbrildkqtszqvverljpwpezmd44ssg", "symbol": "KTA",   "decimals": 18, "source": "network-constants", "verified": true, "note": "Base token. Decimals CONFIRMED against explorer.keeta.com. See FINDINGS.md Gate 1. NOTE: 9 decimals on testnet." },
-    { "address": "keeta_amnkge74xitii5dsobstldatv3irmyimujfjotftx7plaaaseam4bntb7wnna", "symbol": "USDC",  "decimals": 6,  "source": "network-constants", "verified": false },
-    { "address": "keeta_apblhar4ncp3ln62wrygsn73pt3houuvj7ic47aarnolpcu67oqn4xqcji3au", "symbol": "EURC",  "decimals": 6,  "source": "network-constants", "verified": false },
-    { "address": "keeta_apyez4az5r6shtblf3qtzirmikq3tghb5svrmmrltdkxgnnzzhlstby3cuscc", "symbol": "cbBTC", "decimals": 8,  "source": "network-constants", "verified": false },
-    { "address": "keeta_aonxxqry6rknxyb6c5q2ybxk2gt776xlchhcohhyla5kqvinnaduevuxyx3tc", "symbol": "$USD", "decimals": 2, "source": "network-constants", "verified": false },
-    { "address": "keeta_anutgo4o3yp5tvc6wjt4vzsehjbn7t2wylpxmam4d4ojtdkjj2yca2qoinfcs", "symbol": "$EUR", "decimals": 2, "source": "network-constants", "verified": false },
-    { "address": "keeta_aojfknc74dabtg72mdhijtszdlv7gi3ht2xp2wrfmdagkthi4n7rulb5e54ss", "symbol": "$GBP", "decimals": 2, "source": "network-constants", "verified": false },
-    { "address": "keeta_aozyboy42uks7ticj72awfhpdxwqqfcowezxcew6ecaz5afdt7q2ffycxim4u", "symbol": "$CAD", "decimals": 2, "source": "network-constants", "verified": false },
-    { "address": "keeta_aowqb2hvkak7frntfbtde27bdmqvxancrja7ndh24m66ahkbrzeda3crqh3vg", "symbol": "$JPY", "decimals": 0, "source": "network-constants", "verified": false, "note": "ZERO decimals. Must be distinguishable from 'missing'." },
-    { "address": "keeta_apbnf7f34cdq62d7iw4ui6sbfaz7fcqdit354wfaotu5zw6d6xfef5vluhdaos", "symbol": "$HKD", "decimals": 2, "source": "network-constants", "verified": false },
-    { "address": "keeta_amb3hbd5gbhaorl4y2ddl3xn2q4eyi6dqkn5fpug6diz26v2awsdqhkivmyza", "symbol": "$MXN", "decimals": 2, "source": "network-constants", "verified": false },
-    { "address": "keeta_ao44m7r4utf2vvytsfijermgkstnkka6rp44eahrekvp4cmj5g2orzm3blrvc", "symbol": "$CNY", "decimals": 2, "source": "network-constants", "verified": false },
-    { "address": "keeta_anjsvaiiycybwhixlalcpwuvobvmpll4lh24td5qipccegmvfi7c2qdcqnlgu", "symbol": "$AED", "decimals": 2, "source": "network-constants", "verified": false }
+    {
+      "address": "keeta_anqdilpazdekdu4acw65fj7smltcp26wbrildkqtszqvverljpwpezmd44ssg",
+      "symbol": "KTA",
+      "decimals": 18,
+      "source": "network-constants",
+      "verified": true,
+      "note": "Base token. Decimals CONFIRMED against explorer.keeta.com. See FINDINGS.md Gate 1. NOTE: 9 decimals on testnet."
+    },
+    {
+      "address": "keeta_amnkge74xitii5dsobstldatv3irmyimujfjotftx7plaaaseam4bntb7wnna",
+      "symbol": "USDC",
+      "decimals": 6,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_apblhar4ncp3ln62wrygsn73pt3houuvj7ic47aarnolpcu67oqn4xqcji3au",
+      "symbol": "EURC",
+      "decimals": 6,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_apyez4az5r6shtblf3qtzirmikq3tghb5svrmmrltdkxgnnzzhlstby3cuscc",
+      "symbol": "CBBTC",
+      "decimals": 8,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_aonxxqry6rknxyb6c5q2ybxk2gt776xlchhcohhyla5kqvinnaduevuxyx3tc",
+      "symbol": "$USD",
+      "decimals": 2,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_anutgo4o3yp5tvc6wjt4vzsehjbn7t2wylpxmam4d4ojtdkjj2yca2qoinfcs",
+      "symbol": "$EUR",
+      "decimals": 2,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_aojfknc74dabtg72mdhijtszdlv7gi3ht2xp2wrfmdagkthi4n7rulb5e54ss",
+      "symbol": "$GBP",
+      "decimals": 2,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_aozyboy42uks7ticj72awfhpdxwqqfcowezxcew6ecaz5afdt7q2ffycxim4u",
+      "symbol": "$CAD",
+      "decimals": 2,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_aowqb2hvkak7frntfbtde27bdmqvxancrja7ndh24m66ahkbrzeda3crqh3vg",
+      "symbol": "$JPY",
+      "decimals": 0,
+      "source": "network-constants",
+      "verified": false,
+      "note": "ZERO decimals. Must be distinguishable from 'missing'."
+    },
+    {
+      "address": "keeta_apbn7f34cdq62d7iw4ui6sbfaz7fcqdit354wfaotu5zw6d6xfef5vluhdaos",
+      "symbol": "$HKD",
+      "decimals": 2,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_amb3hbd5gbhaorl4y2ddl3xn2q4eyi6dqkn5fpug6diz26v2awsdqhkivmyza",
+      "symbol": "$MXN",
+      "decimals": 2,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_ao44m7r4utf2vvytsfijermgkstnkka6rp44eahrekvp4cmj5g2orzm3blrvc",
+      "symbol": "$CNY",
+      "decimals": 2,
+      "source": "network-constants",
+      "verified": false
+    },
+    {
+      "address": "keeta_anjsvaiiycybwhixlalcpwuvobvmpll4lh24td5qipccegmvfi7c2qdcqnlgu",
+      "symbol": "$AED",
+      "decimals": 2,
+      "source": "network-constants",
+      "verified": false
+    }
   ],
-
   "unknownTokensObserved": [
     {
       "address": "keeta_ao7nitutebhm2pkrfbtniepivaw324hecyb43wsxts5rrhi2p5ckgof37racm",
       "symbol": "MURF",
       "decimals": 18,
       "source": "observed-onchain",
-      "verified": false,
-      "note": "NOT in any registry. Symbol and decimals INFERRED: explorer.keeta.com rendered raw 24902188797697885934532853 as 24,902,188.797697885934532853 MURF, which implies 18 decimals. On-chain account info has EMPTY name and EMPTY metadata. This is the canonical example of a token v1 must HARD-FAIL on rather than guess."
+      "verified": true,
+      "note": "Not in the AnchorFactory registry, but decimals ARE published on-chain: info.metadata decodes to {\"decimalPlaces\":18}, and info.name is MURF. Cross-checked against explorer.keeta.com, which renders raw 24902188797697885934532853 as 24,902,188.797697885934532853 MURF. Excluded from v0.1.x because only KTA has been verified end to end through a real tax import, not because the divisor is unknown."
     },
     {
-      "_note": "Eight further non-KTA tokens were observed in the c24i dump, all with empty name and empty metadata. Addresses are in output/history-raw.json summary.distinctTokens. None are resolvable on-chain. v1 must refuse them.",
+      "_note": "Seven further non-KTA tokens observed on the c24i wallet. All publish decimals on-chain in info.metadata. Observed: CHTA 9, LUCKY 18, MKTA 18, LP_KTA_MURF 18 (three separate LP token accounts). CHTA at 9 decimals is worth noting: it proves the value genuinely varies per token and a hardcoded 18 would be wrong. Excluded from v0.1.x for verification and ticker-labeling reasons, not because decimals are unavailable.",
       "addresses": [
         "keeta_amlsrye6thy6t73yhmogtlb6xqsc7pustswljzmak4pukq2atfqoa5kez3ojy",
         "keeta_am22axs4ba6p5ip5fqg4o33irpfjer2bhoddhxpqjz3ynnxxy63jdhy5mspro",
@@ -97,10 +178,9 @@
         "keeta_angy3punkdpmdrtda5boo56kcjjeo2fcxmoxsng4uq7ati2wzgd76w6z6cziu",
         "keeta_aoclzoxggldxyvemdoe457bp7krxwmx57flx7izhn3nvmo3tid6qkn4xvofhc"
       ],
-      "verified": false
+      "verified": true
     }
   ],
-
   "_limitations": [
     "This list is NOT exhaustive and cannot be. Only TWO bridge anchors are registry-declared. Any bridge operating outside the live metadata endpoint is invisible to us.",
     "A send to an address NOT on this list is therefore NOT evidence that it was not a bridge. The absence of a match must never be reported to the user as 'confirmed not a bridge'.",

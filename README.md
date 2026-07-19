@@ -10,7 +10,7 @@ account, no server.
 
 **Live tool:** https://brownthundercrypto-wq.github.io/keeta-tax-export/
 
-> **v0.1.0.** Tested against Keeta mainnet and `@keetanetwork/keetanet-client`
+> **v0.1.1.** Tested against Keeta mainnet and `@keetanetwork/keetanet-client`
 > **0.18.3** on **19 July 2026**. If you are reading this much later, check that
 > the SDK has not moved. See
 > [KEETA-TECHNICAL-FINDINGS.md](KEETA-TECHNICAL-FINDINGS.md) for what was
@@ -72,13 +72,22 @@ verifiable in about thirty seconds, and you should verify it.
 **KTA only.** If your wallet holds other Keeta tokens, those transactions are
 detected, deliberately excluded, and listed in your review file.
 
-That is a correctness decision, not a missing feature. Keeta does not publish a
-token's decimal precision on-chain. Every token checked had empty metadata. A
-raw number could mean `1.0` or `0.000000001`. Guessing wrong puts a silently
-wrong figure in a tax return. Better to leave a row out and say so.
+The reason is simple: **KTA is what has been checked end to end.** Its amounts
+were reconciled against the block explorer, and a full export was imported into a
+real CoinLedger account with zero errors. Nothing else has been through that.
 
-**Swaps are excluded.** A swap moves two tokens at once and needs both divisors
-to price. Detected, excluded, explained.
+Other tokens raise a question this version does not answer. Several Keeta tokens
+set their ticker to a currency code like `USD`, `EUR` or `JPY`, and tax software
+is likely to resolve those to actual currency rather than a token on Keeta. That
+failure is worse than an excluded row, because the number looks entirely
+reasonable. `CBBTC` has the same problem against BTC.
+
+So excluded rows are listed with their transaction hashes and left to you, rather
+than guessed at. Support may widen once each token has been checked the way KTA
+was.
+
+**Swaps are excluded.** A swap moves two tokens at once, so it needs the second
+token supported before it can be priced. Detected, excluded, explained.
 
 **Bridge detection is partial.** Moving KTA to another chain looks exactly like
 a sale on-chain. Known bridge addresses are flagged, but only two bridge
@@ -149,8 +158,13 @@ disagrees with the shipped SDK or live systems.
 Short version, if you are reading Keeta history yourself:
 
 - **`history()` already paginates internally.** The JSDoc says otherwise.
-- **There is no on-chain source for token decimals**, not even for KTA, and the
-  divisor is network-dependent (18 on mainnet, 9 on testnet).
+- **Token decimals ARE on-chain**, in `info.metadata` as base64 JSON. Note that
+  `client.state()` returns a wrapper: the fields are on `.info`, not on the
+  object itself, and reading the wrong level returns `undefined` with no error.
+  The KTA divisor is also network-dependent (18 on mainnet, 9 on testnet).
+- **Tickers collide with real assets.** Keeta tokens set `info.name` to codes
+  like `USD`, `EUR`, `JPY` and `CBBTC`. Correct decimals will not save you from
+  labeling a tokenized dollar as an actual dollar.
 - **Build from `effects`, not operations.** Effects are pre-scoped to your
   account and pre-netted across the staple.
 - **Never use `isReceive` for direction.** It was `false` on all 26,226 balance

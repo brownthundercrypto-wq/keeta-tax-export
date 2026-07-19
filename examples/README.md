@@ -17,7 +17,7 @@ They were chosen because they show two very different outcomes.
 
 | File | |
 |---|---|
-| [`example-kta-only-wallet.csv`](example-kta-only-wallet.csv) | 3,045 rows, ready to import |
+| [`example-kta-only-wallet.csv`](example-kta-only-wallet.csv) | a few thousand rows, ready to import |
 | [`example-kta-only-wallet-REVIEW.md`](example-kta-only-wallet-REVIEW.md) | the review file |
 
 Address: `keeta_aab5qz62ifv77udwkziftaeea2isqk6v2qat27feoudcmcc5kw3uw2gu5kpk72i`
@@ -26,7 +26,7 @@ Address: `keeta_aab5qz62ifv77udwkziftaeea2isqk6v2qat27feoudcmcc5kw3uw2gu5kpk72i`
 every one made it into the CSV. Nothing was excluded.
 
 The review file is short. It explains why the fee columns are blank, and notes
-that 3,016 transactions had a second amount too small to appear in a tax report
+that most transactions had a second amount too small to appear in a tax report
 at any precision, so they were counted rather than listed.
 
 ## Example 2: a wallet that trades
@@ -56,5 +56,5 @@ Keeta, expect something closer to Example 2, and read the review file.
 
 ---
 
-Generated 19 July 2026 against Keeta mainnet with
+Regenerated 20 July 2026 against Keeta mainnet with
 `@keetanetwork/keetanet-client` 0.18.3.
