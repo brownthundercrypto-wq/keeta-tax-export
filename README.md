@@ -77,6 +77,8 @@ Or host the repository on any static host. There is no build step.
 ### Command line
 
 ```bash
+git clone https://github.com/brownthundercrypto-wq/keeta-tax-export.git
+cd keeta-tax-export
 npm install
 node convert.js <keeta_public_address> [--network main] [--raw]
 ```
