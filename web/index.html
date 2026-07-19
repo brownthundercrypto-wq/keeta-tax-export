@@ -190,12 +190,17 @@
   <p>Swaps are exported as single trade rows, with the asset you gave up and the asset you received on one
      line. Routing fees paid in the same transaction are already folded into those figures.</p>
 
-  <h3>Two things are still left out, on purpose</h3>
-  <p><strong>Tokenized fiat.</strong> Keeta has tokens whose tickers are currency codes: <code>USD</code>,
-     <code>EUR</code>, <code>JPY</code> and others. Their amounts are correct and verified. The problem is the
-     label. Tax software is very likely to read a ticker of <code>USD</code> as actual US dollars, and that
-     produces a right number attached to the wrong asset. That is harder to catch than an obviously broken
-     figure, so these are listed in your review notes instead of exported.</p>
+  <h3>Currency balances are exported as currency</h3>
+  <p>If you hold <code>USD</code>, <code>EUR</code>, <code>JPY</code> or another currency balance on Keeta,
+     those rows come out as ordinary currency rather than as crypto assets.</p>
+  <p>That is deliberate. Those balances redeem one for one through Keeta Personal, which is a regulated
+     money-movement product: accounts are identity verified and carry real bank details, money arrives by
+     direct deposit and leaves by ACH. They behave as cash, so your tax software treats them as cash and
+     computes no gain or loss on them. That is the correct treatment.</p>
+  <p>The rows are labeled clearly enough to change. If a tax professional advises treating them differently,
+     you can adjust them without exporting again.</p>
+
+  <h3>One thing is still left out, on purpose</h3>
   <p><strong>Any token whose divisor cannot be established.</strong> If a token publishes no decimal
      precision, or publishes something that disagrees with our reference list, the tool refuses that row
      rather than guessing. Guessing wrong is a factor-of-ten error in a tax return.</p>

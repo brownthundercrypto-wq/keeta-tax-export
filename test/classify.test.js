@@ -41,9 +41,9 @@ const TOKENS = new Map([
 	[KTA,         tokenInfo({ address: KTA, symbol: 'KTA', decimals: 18 })],
 	[OTHER_TOKEN, tokenInfo({ address: OTHER_TOKEN, symbol: 'MURF', decimals: 18, priceable: false })],
 	[SIX_DP,      tokenInfo({ address: SIX_DP, symbol: 'USDC', decimals: 6 })],
-	[FIAT,        { address: FIAT, symbol: '$USD', decimals: null, exportable: false,
-	                status: 'token is deliberately excluded from export',
-	                excludedReason: 'ticker collision', priceable: false }],
+	/* Currency balance on Keeta Personal: plain ticker, priceable, treated as
+	 * cash. NOT renamed and NOT excluded. See lib/tokens.js for why. */
+	[FIAT,        tokenInfo({ address: FIAT, symbol: 'USD', decimals: 2 })],
 	[BROKEN,      { address: BROKEN, symbol: null, decimals: null, exportable: false,
 	                status: 'token publishes no metadata, so its divisor is unknown', priceable: false }]
 ]);
@@ -171,12 +171,18 @@ console.log('Netting across a staple (the real swap shape)');
 	const r = classifyStaple(staple({
 		balance: { [FIAT]: [entry(-14977n, PEER)], [KTA]: [entry(10n ** 18n, PEER)] }
 	}), CTX);
-	check('trade against excluded fiat is excluded entirely', r.kind, 'flag');
-	check('  reason names the exclusion', r.reason, REASONS.EXCLUDED_TOKEN);
+	check('trade against a currency balance IS exported', r.kind, 'row');
+	check('  it is a trade', r.row.kind, 'trade');
+	check('  currency keeps its plain ticker, not a renamed one', r.row.sent.symbol, 'USD');
+	check('  currency uses its own 2 decimals', formatUnits(r.row.sent.amount, r.row.sent.decimals), '149.77');
+	check('  currency is NOT flagged unpriceable',
+		r.flags.filter((fl) => fl.reason === REASONS.UNPRICEABLE && fl.symbol === 'USD').length, 0);
 }
 {
 	const r = classifyStaple(staple({ balance: { [FIAT]: [entry(-14977n, PEER)] } }), CTX);
-	check('single fiat transfer is excluded', r.reason, REASONS.EXCLUDED_TOKEN);
+	check('single currency transfer IS exported', r.kind, 'row');
+	check('  ticker is the plain currency code', r.row.symbol, 'USD');
+	check('  no unpriceable flag', r.flags.filter((fl) => fl.reason === REASONS.UNPRICEABLE).length, 0);
 }
 {
 	const r = classifyStaple(staple({ balance: { [BROKEN]: [entry(500n, PEER)] } }), CTX);

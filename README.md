@@ -75,11 +75,13 @@ come from each token's own on-chain metadata rather than a list we maintain, so
 a token we have never seen still converts correctly. Swaps become single trade
 rows, with routing fees already folded into the figures.
 
-**Tokenized fiat is excluded on purpose.** Keeta has tokens whose tickers are
-currency codes (`USD`, `EUR`, `JPY`). Their amounts are verified and correct;
-the problem is the label. Tax software is likely to resolve a ticker of `USD` to
-actual US dollars, producing a right number attached to the wrong asset. That is
-harder to catch than a broken figure, so these are listed rather than exported.
+**Currency balances export as currency.** If you hold `USD`, `EUR`, `JPY` or
+another currency balance on Keeta, those rows come out as ordinary currency
+rather than crypto assets. They redeem one for one through Keeta Personal, a
+regulated money-movement product with identity verification, real bank details,
+direct deposit in and ACH out. They behave as cash, so tax software treats them
+as cash and computes no gain or loss. That is the correct treatment, and the rows
+are labeled clearly enough to adjust if a professional advises otherwise.
 
 **Tokens with no readable divisor are refused.** If a token publishes no decimal
 precision, or publishes something that disagrees with our reference list, that

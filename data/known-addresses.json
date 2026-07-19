@@ -103,9 +103,8 @@
       "decimals": 2,
       "source": "network-constants",
       "verified": false,
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "priceable": true,
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment."
     },
     {
       "address": "keeta_anutgo4o3yp5tvc6wjt4vzsehjbn7t2wylpxmam4d4ojtdkjj2yca2qoinfcs",
@@ -113,9 +112,8 @@
       "decimals": 2,
       "source": "network-constants",
       "verified": false,
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "priceable": true,
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment."
     },
     {
       "address": "keeta_aojfknc74dabtg72mdhijtszdlv7gi3ht2xp2wrfmdagkthi4n7rulb5e54ss",
@@ -123,9 +121,8 @@
       "decimals": 2,
       "source": "network-constants",
       "verified": false,
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "priceable": true,
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment."
     },
     {
       "address": "keeta_aozyboy42uks7ticj72awfhpdxwqqfcowezxcew6ecaz5afdt7q2ffycxim4u",
@@ -133,9 +130,8 @@
       "decimals": 2,
       "source": "network-constants",
       "verified": false,
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "priceable": true,
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment."
     },
     {
       "address": "keeta_aowqb2hvkak7frntfbtde27bdmqvxancrja7ndh24m66ahkbrzeda3crqh3vg",
@@ -143,10 +139,8 @@
       "decimals": 0,
       "source": "network-constants",
       "verified": false,
-      "note": "ZERO decimals. Must be distinguishable from 'missing'.",
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment.",
+      "priceable": true
     },
     {
       "address": "keeta_apbn7f34cdq62d7iw4ui6sbfaz7fcqdit354wfaotu5zw6d6xfef5vluhdaos",
@@ -154,9 +148,8 @@
       "decimals": 2,
       "source": "network-constants",
       "verified": false,
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "priceable": true,
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment."
     },
     {
       "address": "keeta_amb3hbd5gbhaorl4y2ddl3xn2q4eyi6dqkn5fpug6diz26v2awsdqhkivmyza",
@@ -164,9 +157,8 @@
       "decimals": 2,
       "source": "network-constants",
       "verified": false,
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "priceable": true,
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment."
     },
     {
       "address": "keeta_ao44m7r4utf2vvytsfijermgkstnkka6rp44eahrekvp4cmj5g2orzm3blrvc",
@@ -174,9 +166,8 @@
       "decimals": 2,
       "source": "network-constants",
       "verified": false,
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "priceable": true,
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment."
     },
     {
       "address": "keeta_anjsvaiiycybwhixlalcpwuvobvmpll4lh24td5qipccegmvfi7c2qdcqnlgu",
@@ -184,9 +175,8 @@
       "decimals": 2,
       "source": "network-constants",
       "verified": false,
-      "excluded": true,
-      "excludedReason": "TICKER COLLISION WITH SOVEREIGN FIAT. This is a Keeta-native tokenized representation, not the currency itself. Its on-chain ticker is a bare currency code (USD, EUR, JPY...), which tax software is likely to resolve to actual fiat. Decimals are verified and correct; the identity is the problem. Emitting these rows would produce a right number attached to the wrong asset, which is harder to catch than a broken number.",
-      "priceable": false
+      "priceable": true,
+      "note": "Tokenized fiat held on Keeta Personal, a regulated money-movement product: users are KYC verified, balances arrive by direct deposit and leave by ACH, and accounts carry real bank details. These are denominations of currency, not tokens that track a currency, so they are exported with their plain ticker and treated as cash. Tax software computes no gain or loss on fiat, which is the correct treatment."
     }
   ],
   "unknownTokensObserved": [
@@ -217,5 +207,6 @@
     "A send to an address NOT on this list is therefore NOT evidence that it was not a bridge. The absence of a match must never be reported to the user as 'confirmed not a bridge'.",
     "Consequently the pattern-based fallback in the spec is mandatory, not optional: v1 must tell the user plainly that bridge detection is best-effort."
   ],
-  "_exclusionNote": "Tokens with excluded:true are deliberately NOT exported. See excludedReason on each. Tokens with priceable:false can be exported but CoinLedger has no price data for them; they require a custom asset and manual historical pricing per transaction."
+  "_exclusionNote": "No token is excluded outright. Tokens with priceable:false are exported but CoinLedger has no price data for them, so they need a custom asset and manual historical pricing per transaction.",
+  "_fiatNote": "The nine tokenized fiat tokens export with their plain on-chain tickers (USD, EUR, GBP, CAD, JPY, HKD, MXN, CNY, AED) and are treated as ordinary currency. They are redeemable 1:1 via ACH through Keeta Personal, so they are cash rather than a speculative asset. An earlier version renamed them to KEETAUSD and similar to avoid tax software resolving them to sovereign fiat; that was reversed, because it would have forced manual pricing on thousands of rows whose value is one dollar by construction."
 }
