@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Keeta Tax Export — CSV for CoinLedger</title>
+<title>Keeta Tax Export: CSV for CoinLedger</title>
 <style>
   :root {
     --bg: #fbfbfa; --fg: #1a1a18; --muted: #6b6b66; --line: #e3e3df;
@@ -59,16 +59,11 @@
   progress { width: 100%; height: 10px; }
   hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
   a { color: var(--accent); }
-  .draft { background: repeating-linear-gradient(45deg, rgba(214,69,65,.08), rgba(214,69,65,.08) 10px, transparent 10px, transparent 20px);
-           border: 1px dashed var(--bad-line); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 20px; }
+  .byline { color: var(--muted); font-size: 14px; margin-top: 32px; }
 </style>
 </head>
 <body>
 <main>
-
-  <div class="draft">
-    <strong>DRAFT COPY.</strong> All wording on this page is placeholder text written for clarity, not for brand voice. Rewrite before launch.
-  </div>
 
   <h1>Keeta Tax Export</h1>
   <p class="sub">Turn your Keeta (KTA) transaction history into a CSV you can import into CoinLedger. Runs entirely in your browser.</p>
@@ -81,9 +76,9 @@
              placeholder="keeta_…" aria-describedby="addr-help">
       <button id="go">Fetch my transactions</button>
       <p id="addr-help" class="note" style="margin-top:14px">
-        This only accepts a <strong>public address</strong> — the same one you would give someone
-        so they can send you KTA. It never asks for, and cannot use, a seed phrase or private key.
-        Nothing you type here is sent to us; there is no server.
+        This only accepts a <strong>public address</strong>. It's the same one you would give
+        someone so they can send you KTA. It never asks for a seed phrase or private key, and
+        cannot use one. Nothing you type here is sent to us. There is no server.
       </p>
       <div id="input-error" class="bad hidden"></div>
     </div>
@@ -113,7 +108,7 @@
       <div class="stats" id="r-stats"></div>
       <div id="r-range" class="note"></div>
       <div id="r-flagsummary"></div>
-      <button id="to-download">Looks right — continue</button>
+      <button id="to-download">Looks right, continue</button>
     </div>
   </section>
 
@@ -125,12 +120,12 @@
       <button id="dl-md" class="secondary">Download review notes</button>
 
       <div class="warn">
-        <h3 style="margin-top:0">Before you import — pick the right KTA</h3>
+        <h3 style="margin-top:0">Before you import, pick the right KTA</h3>
         <p>CoinLedger will ask you to choose between <code>KTA - Keeta</code> and <code>KTA - KTA</code>.</p>
         <p><strong>Choose <code>KTA - Keeta</code>.</strong></p>
-        <p>The other one is an unrelated coin. If you pick it, CoinLedger prices your entire report
-           against the wrong asset — with no error and no warning. CoinLedger can remember the choice,
-           so you only make it once.</p>
+        <p>The other one is an unrelated coin. Pick it and CoinLedger prices your entire report
+           against the wrong asset. No error, no warning. CoinLedger can remember the choice, so
+           you only make it once.</p>
       </div>
 
       <h3>How to import</h3>
@@ -142,9 +137,10 @@
 
       <div class="warn">
         <h3 style="margin-top:0">About bridge transfers</h3>
-        <p>If you moved KTA to another chain, that shows up on Keeta as an ordinary send — it looks
-           exactly like a sale. We flag the bridges we can recognise, but <strong>we cannot detect all
-           of them</strong>: only two bridge operators publish their addresses in a way we can read.</p>
+        <p>If you moved KTA to another chain, that shows up on Keeta as an ordinary send. It looks
+           exactly like a sale. We flag the bridges we can recognize, but <strong>we cannot detect
+           all of them</strong>. Only two bridge operators publish their addresses in a way we can
+           read.</p>
         <p><strong>If you bridged KTA to Base or anywhere else, check those rows yourself.</strong>
            A bridge you moved between your own wallets is usually not a taxable sale, but this file
            cannot tell the difference on its own.</p>
@@ -169,30 +165,35 @@
      database, and we never see your address. The only network requests this page makes are to
      Keeta's nodes and to load the Keeta SDK. You can verify that yourself in your browser's
      developer tools, Network tab.</p>
-  <p>It also never asks for a seed phrase or private key. It could not use one if you gave it one —
-     reading history only needs a public address.</p>
-  <p><strong>There is nothing to monetise here.</strong> No ads, no tracking, no analytics, no
-     affiliate links, no server. This page makes no money and collects nothing, which is the
+  <p>It also never asks for a seed phrase or private key. It could not use one if you gave it one.
+     Reading history only needs a public address.</p>
+  <p><strong>There is nothing to monetize here.</strong> No ads, no tracking, no analytics, no
+     affiliate links, no server. This page makes no money and collects nothing. That is the
      simplest reason to believe the rest of it.</p>
 
   <h2>Why only KTA?</h2>
   <p>This version exports KTA only. If your wallet holds other Keeta tokens, those transactions are
      <strong>detected and deliberately left out</strong>, and listed in your review notes.</p>
   <p>That is a correctness decision, not a missing feature. Keeta does not publish a token's decimal
-     precision on-chain — every token we checked had empty metadata. Without that, a raw number could
-     mean <code>1.0</code> or <code>0.000000001</code>, and guessing wrong would put a silently wrong
-     figure in your tax return. We would rather leave a row out and tell you than quietly get it wrong.</p>
+     precision on-chain. Every token we checked had empty metadata. Without that, a raw number could
+     mean <code>1.0</code> or <code>0.000000001</code>. Guessing wrong would put a silently wrong
+     figure in your tax return. We would rather leave a row out and tell you than quietly get it
+     wrong.</p>
 
   <h2>Read the code</h2>
-  <p>Don't trust us — read it.
+  <p>Don't trust us. Read it.
      <a id="repo-link" href="https://github.com/brownthundercrypto-wq/keeta-tax-export" rel="noopener" target="_blank">GitHub repository</a></p>
 
   <div class="card">
     <h3 style="margin-top:0">Disclaimer</h3>
     <p class="note">This tool formats your on-chain transaction history for import into tax software.
-       It does not provide tax, legal, or financial advice. Transaction classifications are best-effort —
-       review every row before filing. You are responsible for the accuracy of your tax reporting.</p>
+       It does not provide tax, legal, or financial advice. Transaction classifications are
+       best-effort. Review every row before filing. You are responsible for the accuracy of your
+       tax reporting.</p>
   </div>
+
+  <p class="byline">Built by
+     <a href="https://x.com/Brown_Thunder76" rel="noopener" target="_blank">@Brown_Thunder76</a></p>
 
 </main>
 

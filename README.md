@@ -1,8 +1,5 @@
 # Keeta Tax Export
 
-> **DRAFT COPY.** All wording in this README is placeholder text written for
-> clarity, not for brand voice. To be rewritten before launch.
-
 Export your Keeta (KTA) transaction history to a CSV you can import into
 CoinLedger. Runs entirely in your browser, or as a local command-line tool.
 
@@ -25,13 +22,13 @@ This is the part that matters, so it is stated plainly.
 - **There is no backend.** No server, no database, no analytics that see your
   address. The web page talks directly to Keeta's public nodes.
 - **Your address never leaves your browser** except in requests to Keeta's own
-  nodes — the same requests any block explorer makes.
+  nodes. Those are the same requests any block explorer makes.
 - **The CSV is generated in your browser** and saved by your browser. It is
   never uploaded anywhere.
 - **It cannot use a seed phrase or private key.** Reading history needs only a
   public address. Paste something that looks like a seed and the tool refuses it
   and tells you why.
-- **Nothing is monetised.** No ads, no tracking, no analytics, no affiliate
+- **Nothing is monetized.** No ads, no tracking, no analytics, no affiliate
   links, no server. This project makes no money and collects nothing.
 
 You do not have to take any of that on trust. Open your browser's developer
@@ -45,8 +42,8 @@ verifiable in about thirty seconds, and you should verify it.
 detected, deliberately excluded, and listed in your review file.
 
 That is a correctness decision, not a missing feature. Keeta does not publish a
-token's decimal precision on-chain — every token checked had empty metadata. A
-raw number could mean `1.0` or `0.000000001`, and guessing wrong puts a silently
+token's decimal precision on-chain. Every token checked had empty metadata. A
+raw number could mean `1.0` or `0.000000001`. Guessing wrong puts a silently
 wrong figure in a tax return. Better to leave a row out and say so.
 
 **Swaps are excluded.** A swap moves two tokens at once and needs both divisors
@@ -85,9 +82,9 @@ node convert.js <keeta_public_address> [--network main] [--raw]
 
 Writes to `output/`:
 
-- `coinledger-<short>-<timestamp>.csv` — import this
-- `FLAGGED.md` — read this before filing
-- `raw-<short>-<timestamp>.json` — source data, only with `--raw`
+- `coinledger-<short>-<timestamp>.csv`: import this
+- `FLAGGED.md`: read this before filing
+- `raw-<short>-<timestamp>.json`: source data, only with `--raw`
 
 ### Tests
 
@@ -104,7 +101,7 @@ formatting against explorer-verified values, and the blank-field rules.
 
 **Choose `KTA - Keeta`.** CoinLedger will ask you to pick between `KTA - Keeta`
 and an unrelated `KTA - KTA`. Picking wrong prices your entire report against
-the wrong coin — no error, no warning. CoinLedger remembers the choice, so it is
+the wrong coin. No error, no warning. CoinLedger remembers the choice, so it is
 one-time.
 
 Then: **Import → Other Account**, upload the CSV, and read the review file
@@ -115,15 +112,15 @@ before you file anything.
 ## Notes for other Keeta developers
 
 **[KEETA-TECHNICAL-FINDINGS.md](KEETA-TECHNICAL-FINDINGS.md)** documents what was
-learned building this — including seven places where published documentation
+learned building this, including seven places where published documentation
 disagrees with the shipped SDK or live systems.
 
 Short version, if you are reading Keeta history yourself:
 
-- **`history()` already paginates internally** — the JSDoc says otherwise.
+- **`history()` already paginates internally.** The JSDoc says otherwise.
 - **There is no on-chain source for token decimals**, not even for KTA, and the
   divisor is network-dependent (18 on mainnet, 9 on testnet).
-- **Build from `effects`, not operations** — effects are pre-scoped to your
+- **Build from `effects`, not operations.** Effects are pre-scoped to your
   account and pre-netted across the staple.
 - **Never use `isReceive` for direction.** It was `false` on all 26,226 balance
   entries observed, including every incoming one. Use the sign of `value`.
@@ -141,7 +138,7 @@ That file is written to be useful on its own, independent of this tool.
 lib/format.js     amount + date + CSV formatting
 lib/classify.js   per-staple classification (read the header comment first)
 lib/pipeline.js   shared conversion pipeline
-convert.js        CLI wrapper — argument parsing and file I/O only
+convert.js        CLI wrapper: argument parsing and file I/O only
 web/              the static page
 data/             known bridge/anchor addresses and the token registry, with sources
 test/             format contract tests
@@ -149,7 +146,7 @@ test/             format contract tests
 
 The CLI and the web page load **the same `lib/` files**. That is deliberate:
 every rule deciding what lands in a tax report has exactly one implementation,
-so the two cannot silently disagree. Verified by SHA-256 — both produce
+so the two cannot silently disagree. Verified by SHA-256. Both produce
 byte-identical CSV for the same address.
 
 Dependencies: `@keetanetwork/keetanet-client`, pinned to an exact version. That
@@ -160,3 +157,7 @@ is all. Every dependency is something an auditor has to read.
 ## License
 
 MIT.
+
+---
+
+Built by [@Brown_Thunder76](https://x.com/Brown_Thunder76)
