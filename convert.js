@@ -1,5 +1,5 @@
 /*
- * Phase 2 — CLI converter.
+ * Phase 2. CLI converter.
  *
  * Usage:
  *   node convert.js <keeta_public_key> [--network main] [--raw]

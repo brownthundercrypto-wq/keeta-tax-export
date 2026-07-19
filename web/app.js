@@ -1,5 +1,5 @@
 /*
- * Web tool — Phase 3.
+ * Web tool, Phase 3.
  *
  * This file is GLUE ONLY: DOM wiring, progress reporting, and Blob downloads.
  * Every decision that affects what lands in a tax report comes from ../lib/,
@@ -238,7 +238,7 @@
 		if (groups.size > 0) {
 			parts.push('<h3>Needs your review</h3><ul>');
 			for (const [reason, items] of groups) {
-				parts.push(`<li><strong>${items.length}</strong> — ${mdInline(reason)}</li>`);
+				parts.push(`<li><strong>${items.length}</strong>: ${mdInline(reason)}</li>`);
 			}
 			parts.push('</ul>');
 		}
@@ -278,7 +278,7 @@
 				const d = it.detail;
 				out.push('<tr>' +
 					`<td class="hash">${d.stapleHash}</td>` +
-					`<td>${d.timestamp ? K.formatCoinLedgerDate(d.timestamp) : '—'}</td>` +
+					`<td>${d.timestamp ? K.formatCoinLedgerDate(d.timestamp) : '-'}</td>` +
 					`<td>${mdInline(K.describeFlag(reason, d))}</td>` +
 					'</tr>');
 			}

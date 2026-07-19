@@ -5,7 +5,7 @@
   "_networkId": "0x5382",
   "_sources": {
     "live-metadata": "https://static.network.keeta.com/metadata/services (fetched 2026-07-19; enumerated all keeta_ addresses by walking the JSON)",
-    "network-constants": "https://theanchorfactory.com/docs/reference/network-constants (AnchorFactory, Jun 28 2026, v1) — local copy Desktop/keeta/network constants.pdf",
+    "network-constants": "https://theanchorfactory.com/docs/reference/network-constants (AnchorFactory, Jun 28 2026, v1). Local copy: Desktop/keeta/network constants.pdf",
     "observed-onchain": "Derived from output/history-raw.json dumps of real mainnet accounts. Identity INFERRED from on-chain behaviour, not asserted by any registry."
   },
 
@@ -62,7 +62,7 @@
   ],
 
   "tokens": [
-    { "address": "keeta_anqdilpazdekdu4acw65fj7smltcp26wbrildkqtszqvverljpwpezmd44ssg", "symbol": "KTA",   "decimals": 18, "source": "network-constants", "verified": true, "note": "Base token. Decimals CONFIRMED against explorer.keeta.com — see FINDINGS.md Gate 1. NOTE: 9 decimals on testnet." },
+    { "address": "keeta_anqdilpazdekdu4acw65fj7smltcp26wbrildkqtszqvverljpwpezmd44ssg", "symbol": "KTA",   "decimals": 18, "source": "network-constants", "verified": true, "note": "Base token. Decimals CONFIRMED against explorer.keeta.com. See FINDINGS.md Gate 1. NOTE: 9 decimals on testnet." },
     { "address": "keeta_amnkge74xitii5dsobstldatv3irmyimujfjotftx7plaaaseam4bntb7wnna", "symbol": "USDC",  "decimals": 6,  "source": "network-constants", "verified": false },
     { "address": "keeta_apblhar4ncp3ln62wrygsn73pt3houuvj7ic47aarnolpcu67oqn4xqcji3au", "symbol": "EURC",  "decimals": 6,  "source": "network-constants", "verified": false },
     { "address": "keeta_apyez4az5r6shtblf3qtzirmikq3tghb5svrmmrltdkxgnnzzhlstby3cuscc", "symbol": "cbBTC", "decimals": 8,  "source": "network-constants", "verified": false },

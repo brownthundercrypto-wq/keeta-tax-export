@@ -1,4 +1,4 @@
-# Keeta SDK — Technical Findings
+# Keeta SDK: Technical Findings
 
 Notes gathered while building a transaction-history exporter against
 `@keetanetwork/keetanet-client` **v0.18.3** on mainnet, July 2026.
@@ -19,14 +19,14 @@ wallets, and no private wallet data was used at any point:
 | `keeta_aabva3ph7du7vxsjlixr3pgzxyvseizddgxzj7uwzixvvlv2tuewaquqkerc24i` | ~2,008 staples, 1,965 swaps, 9 tokens |
 
 Both are visible to anyone on `explorer.keeta.com`. Reading history requires
-only a public address — no key material of any kind.
+only a public address. No key material of any kind.
 
 **Evidence tags:** **[DATA]** = observed on mainnet · **[SOURCE]** = verified
 against the installed package · **[DOCS]** = documentation claim, unverified.
 
 ---
 
-# 1. Documentation vs. reality — seven discrepancies
+# 1. Documentation vs. reality: seven discrepancies
 
 Published documentation disagreed with the shipped code or live systems **seven
 times**. This is the single most useful thing in this document.
@@ -34,7 +34,7 @@ times**. This is the single most useful thing in this document.
 **Treat documentation as hypothesis and `node_modules` as truth.** Verify before
 relying on any doc claim.
 
-### 1. `history()` pagination — the JSDoc says to paginate; the code already does
+### 1. `history()` pagination: the JSDoc says to paginate, the code already does
 
 The SDK's own doc comment states the request "may return only a partial set" and
 that `startBlocksHash` should be used to fetch the next page. **The client loops
@@ -73,8 +73,8 @@ lib.Numeric:     undefined
 lib.Utils keys:  ASN1, Bloom, Buffer, Certificate, Conversion, DomainSeparation, Hash, Helper, Initial
 ```
 
-Hand-roll decimal formatting on `bigint`. Never route through `Number` —
-amounts routinely exceed 2^53 in base units.
+Hand-roll decimal formatting on `bigint`. Never route through `Number`.
+Amounts routinely exceed 2^53 in base units.
 
 ### 3. "A Send decrements the sender and increments the receiver" is incomplete
 
@@ -82,13 +82,13 @@ There is a distinct `RECEIVE` operation type and a `receivable` flag in the
 effects model, which suggests a two-step claim model. **Real data says otherwise
 for ordinary transfers:** 2,991 staples increased an account's balance and
 *none* contained a `RECEIVE` operation **[DATA]**. A plain SEND credits the
-recipient directly. `RECEIVE` is swap machinery — see §3.
+recipient directly. `RECEIVE` is swap machinery. See §3.
 
 ### 4. The live metadata endpoint does not match its documented schema
 
 Docs specify `{version, currencyMap, services, resolvers}` at the top level. The
 live payload at `static.network.keeta.com/metadata/services` has **none of
-those** — service categories (`kyc, fx, assetMovement, storage, notification,
+those**. Service categories (`kyc, fx, assetMovement, storage, notification,
 username`) sit at top level, with no `version`, no `currencyMap`, no
 `resolvers` **[DATA]**. Code written to the documented shape breaks immediately.
 
@@ -120,8 +120,8 @@ for (const block of history) {
 ```
 
 **Nothing here is correct for 0.18.3.** `history()` takes a *query object* (the
-account comes from client options), returns `{voteStaple, effects}[]` — not flat
-blocks — and `OperationType` is a **numeric enum**, so there is no `'receive'`
+account comes from client options), returns `{voteStaple, effects}[]`, not flat
+blocks. `OperationType` is a **numeric enum**, so there is no `'receive'`
 string **[DATA]**.
 
 ### 7. CoinLedger's CSV header (bonus, different ecosystem, same lesson)
@@ -134,7 +134,7 @@ truth, not the article.
 
 ---
 
-# 2. Token decimals — there is no on-chain source
+# 2. Token decimals: there is no on-chain source
 
 **This is the highest-severity correctness issue for anything that displays
 amounts.**
@@ -163,7 +163,7 @@ base token. The gap is total, not theoretical.
 | **KTA decimals** | **18** | **9** |
 
 Develop against testnet, ship against mainnet, and every amount is wrong by
-**10⁹** — silently. Derive the divisor from the network identifier, and assert
+**10⁹**, silently. Derive the divisor from the network identifier, and assert
 that fetched blocks carry the network ID you expect before trusting any figure.
 
 KTA = 18 on mainnet is **confirmed against the explorer** across 19 orders of
@@ -178,7 +178,7 @@ magnitude **[DATA]**:
 ### What to do about it
 
 Decimals must come from a maintained off-chain registry. Every code example in
-the ecosystem hardcodes them — bridge implementations ship a hand-written
+the ecosystem hardcodes them. Bridge implementations ship a hand-written
 `TOKEN_MAP` and never derive decimals from chain.
 
 A useful registry (KTA 18, USDC 6, EURC 6, cbBTC 8, on-chain fiat tokens 2, and
@@ -196,7 +196,7 @@ Two traps in any such table:
 
 ---
 
-# 3. Atomic swaps — the structure is not what the docs imply
+# 3. Atomic swaps: the structure is not what the docs imply
 
 Documentation describes a swap as `SEND` + `RECEIVE` in one block. That is true,
 **but the block belongs to the counterparty, not to you.**
@@ -230,13 +230,13 @@ MURF: -24902188797697885934532853                      (net negative)
 KTA:  -0.07, -0.077, -0.05, +70.05  =  net +69.853     (net positive)
 ```
 
-Note **KTA appears as both negative and positive in one staple** — routing fees
+Note **KTA appears as both negative and positive in one staple**. Routing fees
 out, proceeds in. A rule that looks for "one negative entry and one positive
 entry" misfires. Only the **net per token** is meaningful. And those same-staple
 fee sends belong to the trade; emitting them separately triple-counts it.
 
 `RECEIVE` operations are real and common (1,965 observed) but appeared in
-**zero** blocks without a paired SEND **[DATA]** — they are swap machinery, not
+**zero** blocks without a paired SEND **[DATA]**. They are swap machinery, not
 a general receive step.
 
 ---
@@ -253,17 +253,17 @@ effects.accounts[yourPublicKey].fields.balance  →  { [tokenAddress]: TokenEntr
 Verified across two wallets **[DATA]**:
 
 - Populated on **100%** of staples that had any financial movement.
-- `otherAccount` present on **100%** of 26,226 balance entries — **counterparty comes free**, no need to parse operations for it.
+- `otherAccount` present on **100%** of 26,226 balance entries. **Counterparty comes free**, with no need to parse operations for it.
 - Values are **signed bigints**; there were zero zero-value entries.
 
 Effects are already scoped to your account and already netted across the staple,
 which is exactly what operations are not. The only thing effects lack is the
-`external` memo on SEND — that is the one legitimate reason to reach for
+`external` memo on SEND. That is the one legitimate reason to reach for
 `filterStapleOperations`.
 
 ## ⚠️ Do not use `isReceive` for direction
 
-**`isReceive` was `false` on all 26,226 balance entries across both wallets —
+**`isReceive` was `false` on all 26,226 balance entries across both wallets,
 including every one of the 3,347 incoming ones** **[DATA]**.
 
 `isReceive: true` belongs to `RequestTokenReceiveEntry`, which pairs with actual
@@ -272,18 +272,18 @@ incoming transfer. **Use the sign of `value`.**
 
 ## Skip staples with no `balance` field
 
-A staple whose effect fields contain no `balance` key is a non-financial event —
+A staple whose effect fields contain no `balance` key is a non-financial event:
 permission change, info update, certificate publish, username claim. Ordinary
 users accumulate these. Skip them; do not emit zero-amount rows.
 
 ---
 
-# 5. Timestamps — there are two, and neither is strictly ordered
+# 5. Timestamps: there are two, and neither is strictly ordered
 
 | Source | Meaning |
 |---|---|
-| `block.date` | Part of the signed block content — **self-reported by the creator** |
-| `staple.timestamp()` | **Average of the representative vote timestamps** — network-attested |
+| `block.date` | Part of the signed block content, **self-reported by the creator** |
+| `staple.timestamp()` | **Average of the representative vote timestamps**, network-attested |
 
 Prefer `staple.timestamp()`: it reflects consensus rather than self-report.
 
@@ -296,8 +296,8 @@ wallet A:  n=6054  min +163ms   median +581ms   max +15.8s   negatives: 0
 wallet B:  n=6830  min -69.2s   median +1.03s   max +82.2s   negatives: 17
 ```
 
-So the real window is roughly **−69s to +82s**. If you bucket by calendar day —
-tax years, daily reports — a transaction near midnight can land in a different
+So the real window is roughly **−69s to +82s**. If you bucket by calendar day, whether tax years or daily reports,
+a transaction near midnight can land in a different
 period depending on which timestamp you pick. Worth flagging rather than
 silently choosing.
 
@@ -316,11 +316,11 @@ TOKEN_ADMIN_SUPPLY=5, TOKEN_ADMIN_MODIFY_BALANCE=6, RECEIVE=7, MANAGE_CERTIFICAT
 ```
 
 Fees appear as a **staple-level aggregate**: `effects.metadata.feeUnits`
-(alongside `blockCount` and `operationCount`). They can also materialise as a
+(alongside `blockCount` and `operationCount`). They can also materialize as a
 separate fee block via `UserClientOptions.generateFeeBlock`.
 
 **Open question:** the *unit* of `feeUnits` is undocumented and we could not
-verify it. Interpreting it as KTA base units yields implausible values — a
+verify it. Interpreting it as KTA base units yields implausible values. A
 typical fee would be ~0.000000000000002 KTA. The name (`feeUnits`, not
 `feeAmount`) hints at a distinct unit. If you need exact fees, confirm this
 before relying on it.
@@ -330,8 +330,8 @@ before relying on it.
 # 7. Smaller things worth knowing
 
 **`publicKeyString` is an object, not a string.** `String()`, template literals,
-and `.get()` all work and are equivalent. **`JSON.stringify` yields `{}`** —
-silent data loss with no error and no `[object Object]` to grep for **[DATA]**.
+and `.get()` all work and are equivalent. **`JSON.stringify` yields `{}`**.
+That is silent data loss with no error and no `[object Object]` to grep for **[DATA]**.
 
 **`String(account)` on an `Account` yields `[object Object]`.** Route every
 address through one helper.
@@ -346,7 +346,7 @@ strings** (`"0x1"`); live objects give **bigint**. Normalize both; never through
 
 **`filterStapleOperations` returns an object keyed by staple hash**, not an
 array, and **not in chronological order**. It also takes `VoteStaple[]`, not the
-`{voteStaple, effects}` wrapper `history()` returns — map first.
+`{voteStaple, effects}` wrapper `history()` returns. Map first.
 
 **Networks are exactly** `"main" | "staging" | "test" | "dev"` **[SOURCE]**.
 
@@ -358,12 +358,12 @@ result **[DATA]**. The polyfill warning appears to apply to bundling the npm
 CommonJS package yourself, not to the pre-built bundle.
 
 **CORS is open.** Keeta's nodes return `access-control-allow-origin: *` for
-arbitrary HTTPS origins, including on preflight **[DATA]** — a purely
+arbitrary HTTPS origins, including on preflight **[DATA]**. A purely
 client-side app is viable.
 
 **Classic scripts share one global scope.** If you load several plain `<script>`
 files, a top-level `function foo` in one and `const foo` in another is a
-*parse-time* `SyntaxError` — the second file silently never registers, with no
+*parse-time* `SyntaxError`. The second file silently never registers, with no
 console error. Wrap each file in an IIFE.
 
 ---

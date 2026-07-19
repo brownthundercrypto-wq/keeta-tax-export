@@ -3,7 +3,7 @@
  *
  * WHY THIS TEST EXISTS: CoinLedger fingerprints the entire header line BEFORE
  * parsing any data row. A single character out of place rejects the whole file
- * — no partial import, no indication of which column was wrong. In testing, a
+ * There is no partial import and no indication of which column was wrong. In testing, a
  * header taken from CoinLedger's own help article (which omits the "(Optional)"
  * suffixes) caused a total rejection. The source of truth is the Google Sheet
  * template, not the help article.
@@ -43,7 +43,7 @@ function check(name, actual, expected) {
 function checkTrue(name, cond, detail) {
 	if (!cond) {
 		failures++;
-		console.log(`  ✗ ${name}${detail ? ' — ' + detail : ''}`);
+		console.log(`  ✗ ${name}${detail ? ': ' + detail : ''}`);
 	} else {
 		console.log(`  ✓ ${name}`);
 	}
@@ -113,7 +113,7 @@ check('empty string stays blank', csvField(''), '');
 
 console.log('');
 if (failures > 0) {
-	console.log(`FAILED — ${failures} assertion(s)`);
+	console.log(`FAILED: ${failures} assertion(s)`);
 	process.exit(1);
 }
 console.log('All assertions passed.');

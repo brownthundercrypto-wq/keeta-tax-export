@@ -4,7 +4,7 @@ node_modules/
 # ---------------------------------------------------------------------------
 # Generated output. NEVER COMMIT THIS DIRECTORY.
 #
-# It contains raw transaction history for real mainnet wallets — the dumps run
+# It contains raw transaction history for real mainnet wallets. The dumps run
 # to 100MB+ each and hold hundreds of thousands of third-party addresses, plus
 # generated CSVs and review files with real transaction data. None of it is
 # ours to publish, and none of it is needed to run or audit the tool.
