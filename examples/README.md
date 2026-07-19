@@ -33,6 +33,42 @@ at any precision, so they were counted rather than listed.
 
 | File | |
 |---|---|
+| [`example-swap-wallet.csv`](example-swap-wallet.csv) | ~2,000 rows, mostly trades |
+| [`example-swap-wallet-REVIEW.md`](example-swap-wallet-REVIEW.md) | the review file |
+
+Address: `keeta_aabva3ph7du7vxsjlixr3pgzxyvseizddgxzj7uwzixvvlv2tuewaquqkerc24i`
+
+**This wallet trades constantly**, and shows what a swap looks like once exported.
+Each trade is a single row: the asset given up in the Sent columns, the asset
+received in the Received columns. Routing fees paid in the same transaction are
+already folded into those figures rather than appearing as separate withdrawals.
+
+It also shows the honest limits. Most of its tokens are ones CoinLedger has no
+price history for, so the review file states plainly how many rows need a custom
+asset and a manually entered price. That number is worth reading before importing:
+it is the difference between a file you can upload and an afternoon of manual work.
+
+A handful of transactions are still excluded, including one token launch where
+three tokens arrived and none left. That is not a trade, and forcing it into a
+trade row would misreport it.
+
+---|---|
+| [`example-kta-only-wallet.csv`](example-kta-only-wallet.csv) | a few thousand rows, ready to import |
+| [`example-kta-only-wallet-REVIEW.md`](example-kta-only-wallet-REVIEW.md) | the review file |
+
+Address: `keeta_aab5qz62ifv77udwkziftaeea2isqk6v2qat27feoudcmcc5kw3uw2gu5kpk72i`
+
+**This is the clean case.** Every transaction moved KTA and nothing else, so
+every one made it into the CSV. Nothing was excluded.
+
+The review file is short. It explains why the fee columns are blank, and notes
+that most transactions had a second amount too small to appear in a tax report
+at any precision, so they were counted rather than listed.
+
+## Example 2: a wallet that trades
+
+| File | |
+|---|---|
 | [`example-swap-wallet.csv`](example-swap-wallet.csv) | 7 rows |
 | [`example-swap-wallet-REVIEW.md`](example-swap-wallet-REVIEW.md) | the review file, and the interesting part |
 
@@ -56,5 +92,5 @@ Keeta, expect something closer to Example 2, and read the review file.
 
 ---
 
-Regenerated 20 July 2026 against Keeta mainnet with
+Regenerated 20 July 2026 (v0.2.0) against Keeta mainnet with
 `@keetanetwork/keetanet-client` 0.18.3.

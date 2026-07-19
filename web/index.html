@@ -68,7 +68,7 @@
 
   <h1>Keeta Tax Export</h1>
   <p class="sub">Turn your Keeta (KTA) transaction history into a CSV you can import into CoinLedger. Runs entirely in your browser.</p>
-  <p class="version">v0.1.1. Tested against Keeta mainnet and
+  <p class="version">v0.2.0. Tested against Keeta mainnet and
      <code>@keetanetwork/keetanet-client</code> 0.18.3 on 19 July 2026.
      If you are reading this much later, check that the SDK has not moved.</p>
 
@@ -129,6 +129,8 @@
       <button id="dl-csv">Download CSV</button>
       <button id="dl-md" class="secondary">Download review notes</button>
 
+      <div id="dl-warnings"></div>
+
       <div class="warn">
         <h3 style="margin-top:0">Before you import, pick the right KTA</h3>
         <p>CoinLedger will ask you to choose between <code>KTA - Keeta</code> and <code>KTA - KTA</code>.</p>
@@ -181,19 +183,29 @@
      affiliate links, no server. This page makes no money and collects nothing. That is the
      simplest reason to believe the rest of it.</p>
 
-  <h2>Why only KTA?</h2>
-  <p>This version exports KTA only. If your wallet holds other Keeta tokens, those transactions are
-     <strong>detected and deliberately left out</strong>, and listed in your review notes.</p>
-  <p>The reason is simple: <strong>KTA is what has been checked end to end.</strong> Its amounts were
-     reconciled against the block explorer, and a full export was imported into a real CoinLedger
-     account with zero errors. Nothing else has been through that.</p>
-  <p>Other tokens raise questions this version does not answer. Several Keeta tokens use tickers like
-     <code>USD</code>, <code>EUR</code> and <code>JPY</code>, which tax software is likely to read as
-     actual currency rather than a token on Keeta. Getting that wrong is worse than leaving a row
-     out, because the number looks perfectly reasonable.</p>
-  <p>So the excluded rows are listed with their transaction hashes and left for you, rather than
-     guessed at. Support may widen once each token has been checked the same way KTA was.</p>
+  <h2>Which tokens are included</h2>
+  <p>This version exports <strong>every Keeta token whose decimal precision is published on-chain</strong>,
+     which is almost all of them. Amounts are read from each token's own on-chain metadata rather than from
+     a list we maintain, so a token we have never seen still converts correctly.</p>
+  <p>Swaps are exported as single trade rows, with the asset you gave up and the asset you received on one
+     line. Routing fees paid in the same transaction are already folded into those figures.</p>
 
+  <h3>Two things are still left out, on purpose</h3>
+  <p><strong>Tokenized fiat.</strong> Keeta has tokens whose tickers are currency codes: <code>USD</code>,
+     <code>EUR</code>, <code>JPY</code> and others. Their amounts are correct and verified. The problem is the
+     label. Tax software is very likely to read a ticker of <code>USD</code> as actual US dollars, and that
+     produces a right number attached to the wrong asset. That is harder to catch than an obviously broken
+     figure, so these are listed in your review notes instead of exported.</p>
+  <p><strong>Any token whose divisor cannot be established.</strong> If a token publishes no decimal
+     precision, or publishes something that disagrees with our reference list, the tool refuses that row
+     rather than guessing. Guessing wrong is a factor-of-ten error in a tax return.</p>
+
+  <h3>A warning about tokens nobody prices</h3>
+  <p>Exporting a token is not the same as your tax software knowing what it was worth. CoinLedger only has
+     price history for assets it already tracks. For anything else you have to add a custom asset and enter
+     the price yourself, per transaction, at each date.</p>
+  <p>The tool tells you how many rows this affects <em>before</em> you download, so you can judge the work
+     involved rather than discovering it afterwards.</p>
   <h2>Read the code</h2>
   <p>Don't trust us. Read it.
      <a id="repo-link" href="https://github.com/brownthundercrypto-wq/keeta-tax-export" rel="noopener" target="_blank">GitHub repository</a></p>
@@ -232,6 +244,7 @@
 <!-- Shared logic, identical files used by the Node CLI. Order matters:
      format defines parseUnits, which classify reads at load time. -->
 <script src="../lib/format.js"></script>
+<script src="../lib/tokens.js"></script>
 <script src="../lib/classify.js"></script>
 <script src="../lib/pipeline.js"></script>
 <script src="./app.js"></script>

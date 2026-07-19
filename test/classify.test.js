@@ -28,14 +28,30 @@ const KTA = 'keeta_ktatoken00000000000000000000000000000000000000000000000000';
 const OTHER_TOKEN = 'keeta_othertoken0000000000000000000000000000000000000000000000';
 const BRIDGE = 'keeta_bridgeanchor000000000000000000000000000000000000000000000';
 const PEER = 'keeta_counterparty00000000000000000000000000000000000000000000';
+const SIX_DP = 'keeta_sixdecimaltoken000000000000000000000000000000000000000000';
+const FIAT = 'keeta_fiattokenusd00000000000000000000000000000000000000000000';
+const BROKEN = 'keeta_brokenmetadata000000000000000000000000000000000000000000';
+
+/* Resolved token map, as lib/tokens.js produces it from ON-CHAIN metadata. */
+function tokenInfo(o) {
+	return (Object.assign({ status: 'ok', exportable: true, priceable: true }, o));
+}
+
+const TOKENS = new Map([
+	[KTA,         tokenInfo({ address: KTA, symbol: 'KTA', decimals: 18 })],
+	[OTHER_TOKEN, tokenInfo({ address: OTHER_TOKEN, symbol: 'MURF', decimals: 18, priceable: false })],
+	[SIX_DP,      tokenInfo({ address: SIX_DP, symbol: 'USDC', decimals: 6 })],
+	[FIAT,        { address: FIAT, symbol: '$USD', decimals: null, exportable: false,
+	                status: 'token is deliberately excluded from export',
+	                excludedReason: 'ticker collision', priceable: false }],
+	[BROKEN,      { address: BROKEN, symbol: null, decimals: null, exportable: false,
+	                status: 'token publishes no metadata, so its divisor is unknown', priceable: false }]
+]);
 
 const CTX = {
 	ourKey: OUR_KEY,
-	baseToken: KTA,
-	baseTokenSymbol: 'KTA',
-	baseTokenDecimals: 18,
 	bridgeAnchors: new Map([[BRIDGE, { address: BRIDGE, name: 'test-bridge' }]]),
-	tokenRegistry: new Map([[OTHER_TOKEN, { address: OTHER_TOKEN, symbol: 'OTHER', decimals: undefined }]]),
+	tokens: TOKENS,
 	networkAlias: 'main',
 	networkIdHex: '0x5382'
 };
@@ -102,8 +118,11 @@ console.log('');
 console.log('Netting across a staple (the real swap shape)');
 
 {
-	/* Mirrors mainnet staple 74F743C3: same token both directions, plus a
-	 * second token. Fees out, proceeds in. */
+	/*
+	 * Mirrors mainnet staple 74F743C3 exactly: KTA appears three times negative
+	 * (routing fees) and once positive (proceeds), against one MURF leg. The
+	 * hand-checked net is +69853000000000000000 KTA.
+	 */
 	const r = classifyStaple(staple({
 		balance: {
 			[KTA]: [entry(-70000000000000000n, PEER), entry(-77000000000000000n, PEER),
@@ -111,12 +130,57 @@ console.log('Netting across a staple (the real swap shape)');
 			[OTHER_TOKEN]: [entry(-24902188797697885934532853n, PEER)]
 		}
 	}), CTX);
-	check('two tokens net non-zero is excluded, not a row', r.kind, 'flag');
-	check('  reason is multi-token', r.reason, REASONS.MULTI_TOKEN);
-	check('  both legs reported', r.detail.legs.length, 2);
-	const kta = r.detail.legs.find((l) => l.token === KTA);
-	check('  KTA nets positive despite 3 negative entries', kta.net, '69853000000000000000');
-	check('  KTA direction is in', kta.direction, 'in');
+	check('one token in, one out is a TRADE row', r.kind, 'row');
+	check('  row kind is trade', r.row.kind, 'trade');
+	check('  sent leg is the net-negative token', r.row.sent.symbol, 'MURF');
+	check('  sent amount is unsigned', r.row.sent.amount.toString(), '24902188797697885934532853');
+	check('  received leg is the net-positive token', r.row.received.symbol, 'KTA');
+	check('  KTA nets +69.853 despite 3 negative entries', r.row.received.amount.toString(), '69853000000000000000');
+	check('  received formats correctly', formatUnits(r.row.received.amount, 18), '69.853');
+	checkTrue('  unpriceable flag raised for MURF',
+		!!r.flags.find((fl) => fl.reason === REASONS.UNPRICEABLE && fl.symbol === 'MURF'));
+}
+{
+	/* Token launch: three tokens in, none out. Not a trade. */
+	const r = classifyStaple(staple({
+		balance: {
+			[KTA]: [entry(10n ** 18n, PEER)],
+			[OTHER_TOKEN]: [entry(10n ** 24n, PEER)],
+			[SIX_DP]: [entry(1000n, PEER)]
+		}
+	}), CTX);
+	check('three tokens in, none out is NOT a trade', r.kind, 'flag');
+	check('  reason is multi-leg', r.reason, REASONS.MULTI_LEG);
+	check('  in/out counts reported', r.detail.inCount + '/' + r.detail.outCount, '3/0');
+}
+{
+	/* A trade between an 8-decimal and an 18-decimal asset must keep both. */
+	const r = classifyStaple(staple({
+		balance: {
+			[SIX_DP]: [entry(-2797489383n, PEER)],
+			[KTA]: [entry(1234567890123456789n, PEER)]
+		}
+	}), CTX);
+	check('mixed-precision trade emits a row', r.row.kind, 'trade');
+	check('  6dp leg keeps its precision', formatUnits(r.row.sent.amount, r.row.sent.decimals), '2797.489383');
+	check('  18dp leg keeps its precision', formatUnits(r.row.received.amount, r.row.received.decimals), '1.234567890123456789');
+}
+{
+	/* Excluded fiat poisons the whole staple: emitting the other leg alone
+	 * would turn one trade into a phantom one-sided transfer. */
+	const r = classifyStaple(staple({
+		balance: { [FIAT]: [entry(-14977n, PEER)], [KTA]: [entry(10n ** 18n, PEER)] }
+	}), CTX);
+	check('trade against excluded fiat is excluded entirely', r.kind, 'flag');
+	check('  reason names the exclusion', r.reason, REASONS.EXCLUDED_TOKEN);
+}
+{
+	const r = classifyStaple(staple({ balance: { [FIAT]: [entry(-14977n, PEER)] } }), CTX);
+	check('single fiat transfer is excluded', r.reason, REASONS.EXCLUDED_TOKEN);
+}
+{
+	const r = classifyStaple(staple({ balance: { [BROKEN]: [entry(500n, PEER)] } }), CTX);
+	check('token with unreadable metadata is refused', r.reason, REASONS.UNRESOLVED_TOKEN);
 }
 {
 	/* Same token both ways, netting to a single direction: emitted, but the
@@ -159,9 +223,10 @@ console.log('Unknown tokens hard-fail rather than assume a divisor');
 
 {
 	const r = classifyStaple(staple({ balance: { [OTHER_TOKEN]: [entry(1000000n, PEER)] } }), CTX);
-	check('single non-KTA token is excluded', r.kind, 'flag');
-	check('  reason is unknown token', r.reason, REASONS.UNKNOWN_TOKEN);
-	check('  registry decimals are NOT trusted', r.detail.registryDecimals, null);
+	check('a readable non-KTA token now EXPORTS', r.kind, 'row');
+	check('  uses the token own decimals', r.row.decimals, 18);
+	check('  uses the token own symbol', r.row.symbol, 'MURF');
+	checkTrue('  flagged as unpriceable', !!r.flags.find((fl) => fl.reason === REASONS.UNPRICEABLE));
 }
 {
 	checkTrue('formatUnits refuses undefined decimals', (() => {
@@ -252,6 +317,29 @@ console.log('CSV row shape (CoinLedger rejects 0 / N/A in unused columns)');
 	check('fee columns are blank (denomination unverified)', withdrawal[6] + withdrawal[7], '');
 	check('date has no ISO artifacts', /[TZ+]/.test(withdrawal[0]), false);
 	check('date format', withdrawal[0], '02/01/2026 10:00:00');
+}
+
+console.log('');
+console.log('Trade CSV row: both pairs on ONE row, Type blank');
+
+{
+	const ctx = { ...CTX, memos: new Map() };
+	const { rows } = P.processHistory([
+		staple({ balance: { [OTHER_TOKEN]: [entry(-24902188797697885934532853n, PEER)],
+		                    [KTA]: [entry(69853000000000000000n, PEER)] } },
+			{ hash: 'TRADE1', date: new Date('2026-04-01T09:00:00Z') })
+	], ctx);
+	const line = P.buildCsv(rows).split(String.fromCharCode(13, 10))[1].split(',');
+	check('Asset Sent is the net-negative token', line[2], 'MURF');
+	check('Amount Sent filled', line[3], '24902188.797697885934532853');
+	check('Asset Received is the net-positive token', line[4], 'KTA');
+	check('Amount Received filled', line[5], '69.853');
+	check('Fee Currency blank', line[6], '');
+	check('Fee Amount blank', line[7], '');
+	check('Type is BLANK so CoinLedger infers a trade', line[8], '');
+	checkTrue('high-precision row is flagged, not rounded',
+		P.processHistory([staple({ balance: { [OTHER_TOKEN]: [entry(-24902188797697885934532853n, PEER)],
+			[KTA]: [entry(69853000000000000000n, PEER)] } }, { hash: 'T2' })], ctx).stats.highPrecisionRows === 1);
 }
 
 console.log('');

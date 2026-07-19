@@ -10,7 +10,7 @@ account, no server.
 
 **Live tool:** https://brownthundercrypto-wq.github.io/keeta-tax-export/
 
-> **v0.1.1.** Tested against Keeta mainnet and `@keetanetwork/keetanet-client`
+> **v0.2.0.** Tested against Keeta mainnet and `@keetanetwork/keetanet-client`
 > **0.18.3** on **19 July 2026**. If you are reading this much later, check that
 > the SDK has not moved. See
 > [KEETA-TECHNICAL-FINDINGS.md](KEETA-TECHNICAL-FINDINGS.md) for what was
@@ -69,25 +69,30 @@ verifiable in about thirty seconds, and you should verify it.
 
 ## Honest limitations
 
-**KTA only.** If your wallet holds other Keeta tokens, those transactions are
-detected, deliberately excluded, and listed in your review file.
+**Most tokens are included.** This version exports every Keeta token whose
+decimal precision is published on-chain, which is almost all of them. Amounts
+come from each token's own on-chain metadata rather than a list we maintain, so
+a token we have never seen still converts correctly. Swaps become single trade
+rows, with routing fees already folded into the figures.
 
-The reason is simple: **KTA is what has been checked end to end.** Its amounts
-were reconciled against the block explorer, and a full export was imported into a
-real CoinLedger account with zero errors. Nothing else has been through that.
+**Tokenized fiat is excluded on purpose.** Keeta has tokens whose tickers are
+currency codes (`USD`, `EUR`, `JPY`). Their amounts are verified and correct;
+the problem is the label. Tax software is likely to resolve a ticker of `USD` to
+actual US dollars, producing a right number attached to the wrong asset. That is
+harder to catch than a broken figure, so these are listed rather than exported.
 
-Other tokens raise a question this version does not answer. Several Keeta tokens
-set their ticker to a currency code like `USD`, `EUR` or `JPY`, and tax software
-is likely to resolve those to actual currency rather than a token on Keeta. That
-failure is worse than an excluded row, because the number looks entirely
-reasonable. `CBBTC` has the same problem against BTC.
+**Tokens with no readable divisor are refused.** If a token publishes no decimal
+precision, or publishes something that disagrees with our reference list, that
+row is refused rather than guessed. A wrong divisor is a factor-of-ten error.
 
-So excluded rows are listed with their transaction hashes and left to you, rather
-than guessed at. Support may widen once each token has been checked the way KTA
-was.
+**Exporting a token is not the same as pricing it.** CoinLedger only has price
+history for assets it tracks. Anything else needs a custom asset and a manually
+entered price per transaction. The tool reports how many rows are affected
+before you download, so you can judge the work before taking it on.
 
-**Swaps are excluded.** A swap moves two tokens at once, so it needs the second
-token supported before it can be priced. Detected, excluded, explained.
+**CBBTC is not BTC.** It is a bridged representation with its own address and
+decimals. Map it as a distinct asset. Mapping it to BTC prices it against
+Bitcoin and merges the holdings.
 
 **Bridge detection is partial.** Moving KTA to another chain looks exactly like
 a sale on-chain. Known bridge addresses are flagged, but only two bridge

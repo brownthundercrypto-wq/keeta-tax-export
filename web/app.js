@@ -177,7 +177,14 @@
 			el.pStatus.textContent = 'Checking the data…';
 			K.assertNetworkMatches(history, net.networkIdHex);
 
+			el.pStatus.textContent = 'Reading token details…';
 			const memos = K.buildMemoIndex(client, history.map((e) => e.voteStaple));
+
+			/* One metadata call per distinct token, cached. */
+			const tokens = await K.prefetchTokens(
+				client, globalThis.KeetaNet.lib.Account, history, publicKey, tokenRegistry,
+				(done, total) => { el.pStatus.textContent = `Reading token details… ${done}/${total}`; }
+			);
 
 			const ctx = {
 				ourKey: publicKey,
@@ -186,6 +193,7 @@
 				baseTokenDecimals: net.baseTokenDecimals,
 				bridgeAnchors: bridgeAnchors,
 				tokenRegistry: tokenRegistry,
+				tokens: tokens,
 				networkAlias: net.alias,
 				networkIdHex: net.networkIdHex,
 				memos: memos
@@ -302,7 +310,53 @@
 		}
 	});
 
+	function renderDownloadWarnings() {
+		const { stats } = result;
+		const out = [];
+
+		if (stats.unpriceableRows > 0) {
+			const syms = [...stats.unpriceableSymbols].filter(Boolean).join(", ");
+			out.push(
+				'<div class="warn"><h3 style="margin-top:0">' + stats.unpriceableRows +
+				' rows use tokens CoinLedger cannot price</h3>' +
+				'<p>Affected: <strong>' + syms + '</strong></p>' +
+				'<p>CoinLedger only has prices for assets it knows. For these you must add a ' +
+				'<strong>custom asset</strong> and then <strong>enter the price yourself for every ' +
+				'transaction, at every date</strong>. There is no automatic pricing.</p>' +
+				'<p><strong>' + stats.unpriceableRows + ' rows means ' + stats.unpriceableRows +
+				' prices to research and type in.</strong> Decide whether that is worth it before you ' +
+				'import.</p></div>'
+			);
+		}
+
+		if (stats.byToken && stats.byToken.has("CBBTC")) {
+			out.push(
+				'<div class="warn"><h3 style="margin-top:0">CBBTC is not BTC</h3>' +
+				'<p>Your export contains <strong>CBBTC</strong>, a bridged representation of Bitcoin ' +
+				'on Keeta. It is a different asset from BTC.</p>' +
+				'<p><strong>Map it as its own asset, never as BTC.</strong> If you map it to BTC, ' +
+				'CoinLedger prices it against Bitcoin and treats the two as one holding. The numbers ' +
+				'will look reasonable and be wrong. Same trap as picking the wrong KTA, with more ' +
+				'value per unit at stake.</p></div>'
+			);
+		}
+
+		if (stats.highPrecisionRows > 0) {
+			out.push(
+				'<div class="warn"><h3 style="margin-top:0">Upload the file as it is</h3>' +
+				'<p>' + stats.highPrecisionRows + ' rows carry more decimal places than a spreadsheet ' +
+				'reliably preserves. The exact values are in your CSV.</p>' +
+				'<p><strong>Do not open and re-save it in Excel, Sheets or Numbers first.</strong> ' +
+				'Doing so can quietly round those amounts before your tax software sees them.</p></div>'
+			);
+		}
+
+		const el2 = document.getElementById("dl-warnings");
+		if (el2) { el2.innerHTML = out.join(""); }
+	}
+
 	el.toDownload.addEventListener('click', () => {
+		renderDownloadWarnings();
 		renderMdView();
 		show(el.stateDownload);
 	});

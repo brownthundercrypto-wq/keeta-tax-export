@@ -89,6 +89,15 @@ async function main() {
 
 	const memos = P.buildMemoIndex(client, history.map((e) => e.voteStaple));
 
+	/* Resolve token identities from on-chain metadata, one call per token. */
+	const tokenAddrs = P.collectTokens(history, publicKey);
+	console.log(`resolving ${tokenAddrs.length} distinct token(s) from on-chain metadata…`);
+	const tokens = await P.prefetchTokens(client, KeetaNetLib.Account, history, publicKey, tokenRegistry);
+	for (const [addr, t] of tokens) {
+		const tag = t.exportable ? `${t.symbol} (${t.decimals} dp)${t.priceable ? '' : ', no price data'}` : `EXCLUDED: ${t.status}`;
+		console.log(`  ${(t.symbol || addr.slice(0, 18)).padEnd(14)} ${tag}`);
+	}
+
 	const ctx = {
 		ourKey: publicKey,
 		baseToken: baseToken,
@@ -96,6 +105,7 @@ async function main() {
 		baseTokenDecimals: net.baseTokenDecimals,
 		bridgeAnchors: bridgeAnchors,
 		tokenRegistry: tokenRegistry,
+		tokens: tokens,
 		networkAlias: net.alias,
 		networkIdHex: net.networkIdHex,
 		memos: memos
@@ -128,8 +138,20 @@ async function main() {
 	} else {
 		console.log('date range:                 (no rows)');
 	}
-	console.log(`total in  (${net.baseTokenSymbol}):            ${formatUnits(stats.totalIn, net.baseTokenDecimals)}`);
-	console.log(`total out (${net.baseTokenSymbol}):            ${formatUnits(stats.totalOut, net.baseTokenDecimals)}`);
+	console.log(`  rows: ${stats.transfers} transfer(s), ${stats.trades} trade(s)`);
+	console.log('');
+	console.log('totals by token:');
+	for (const [sym, t] of stats.byToken) {
+		console.log(`  ${sym.padEnd(14)} in ${formatUnits(t.in, t.decimals).padStart(28)}   out ${formatUnits(t.out, t.decimals).padStart(28)}`);
+	}
+	if (stats.unpriceableRows > 0) {
+		console.log('');
+		console.log(`  !! ${stats.unpriceableRows} row(s) use tokens CoinLedger cannot price: ${[...stats.unpriceableSymbols].join(', ')}`);
+		console.log('     each needs a custom asset and a manually entered price per transaction');
+	}
+	if (stats.highPrecisionRows > 0) {
+		console.log(`  !! ${stats.highPrecisionRows} row(s) exceed 15 significant digits; exact values are in the CSV`);
+	}
 	console.log(`raw feeUnits (not exported):${String(stats.feeUnitsTotal).padStart(14)}  across ${stats.staplesWithFee} staples`);
 	console.log('===============================================');
 
