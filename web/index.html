@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keeta Tax Export — CSV for CoinLedger</title>
+<style>
+  :root {
+    --bg: #fbfbfa; --fg: #1a1a18; --muted: #6b6b66; --line: #e3e3df;
+    --accent: #1f6feb; --warn-bg: #fff8e6; --warn-line: #e0b243;
+    --bad-bg: #fdeceb; --bad-line: #d64541; --ok: #1a7f45; --card: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16161a; --fg: #ececea; --muted: #9a9a94; --line: #2e2e34;
+      --accent: #6aa3ff; --warn-bg: #33290f; --warn-line: #a3801f;
+      --bad-bg: #3a1f1e; --bad-line: #d64541; --ok: #4cc47f; --card: #1e1e23;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 24px 16px 64px;
+  }
+  main { max-width: 780px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 19px; margin: 32px 0 10px; }
+  h3 { font-size: 16px; margin: 22px 0 6px; }
+  p { margin: 10px 0; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 16px 0; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  input[type=text] {
+    width: 100%; padding: 12px; font: 15px ui-monospace, SFMono-Regular, Consolas, monospace;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg);
+  }
+  input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    font: 600 15px inherit; padding: 12px 18px; border-radius: 8px; border: 1px solid transparent;
+    background: var(--accent); color: #fff; cursor: pointer; margin-top: 12px;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button.secondary { background: transparent; color: var(--accent); border-color: var(--accent); }
+  .note { color: var(--muted); font-size: 14px; }
+  .warn { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 8px; padding: 14px; margin: 14px 0; }
+  .bad { background: var(--bad-bg); border: 1px solid var(--bad-line); border-radius: 8px; padding: 14px; margin: 14px 0; }
+  .hidden { display: none; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 14px 0; }
+  .stat { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .stat .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .stat .v { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .92em; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: rgba(127,127,127,.08); font-weight: 600; white-space: nowrap; }
+  td.hash { font-family: ui-monospace, Consolas, monospace; font-size: 11px; word-break: break-all; }
+  progress { width: 100%; height: 10px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
+  a { color: var(--accent); }
+  .draft { background: repeating-linear-gradient(45deg, rgba(214,69,65,.08), rgba(214,69,65,.08) 10px, transparent 10px, transparent 20px);
+           border: 1px dashed var(--bad-line); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+<main>
+
+  <div class="draft">
+    <strong>DRAFT COPY.</strong> All wording on this page is placeholder text written for clarity, not for brand voice. Rewrite before launch.
+  </div>
+
+  <h1>Keeta Tax Export</h1>
+  <p class="sub">Turn your Keeta (KTA) transaction history into a CSV you can import into CoinLedger. Runs entirely in your browser.</p>
+
+  <!-- ===================== STATE 1: INPUT ===================== -->
+  <section id="state-input">
+    <div class="card">
+      <label for="addr">Paste your Keeta public address</label>
+      <input id="addr" type="text" spellcheck="false" autocapitalize="off" autocomplete="off"
+             placeholder="keeta_…" aria-describedby="addr-help">
+      <button id="go">Fetch my transactions</button>
+      <p id="addr-help" class="note" style="margin-top:14px">
+        This only accepts a <strong>public address</strong> — the same one you would give someone
+        so they can send you KTA. It never asks for, and cannot use, a seed phrase or private key.
+        Nothing you type here is sent to us; there is no server.
+      </p>
+      <div id="input-error" class="bad hidden"></div>
+    </div>
+  </section>
+
+  <!-- ===================== STATE 2: PROGRESS ===================== -->
+  <section id="state-progress" class="hidden">
+    <div class="card">
+      <h2 style="margin-top:0">Reading the Keeta network…</h2>
+      <p class="note">This talks directly to Keeta's nodes from your browser. A wallet with a few thousand
+         transactions takes around 90 seconds. Leave this tab open.</p>
+      <progress id="bar"></progress>
+      <div class="stats">
+        <div class="stat"><div class="k">Transactions found</div><div class="v" id="p-staples">0</div></div>
+        <div class="stat"><div class="k">Pages fetched</div><div class="v" id="p-pages">0</div></div>
+        <div class="stat"><div class="k">Elapsed</div><div class="v" id="p-elapsed">0s</div></div>
+      </div>
+      <p class="note" id="p-status">Connecting…</p>
+    </div>
+  </section>
+
+  <!-- ===================== STATE 3: REVIEW ===================== -->
+  <section id="state-review" class="hidden">
+    <div class="card">
+      <h2 style="margin-top:0">Here is what we found</h2>
+      <p class="note">Check this before you download. It tells you exactly what will and will not be in your file.</p>
+      <div class="stats" id="r-stats"></div>
+      <div id="r-range" class="note"></div>
+      <div id="r-flagsummary"></div>
+      <button id="to-download">Looks right — continue</button>
+    </div>
+  </section>
+
+  <!-- ===================== STATE 4: DOWNLOAD ===================== -->
+  <section id="state-download" class="hidden">
+    <div class="card">
+      <h2 style="margin-top:0">Your files are ready</h2>
+      <button id="dl-csv">Download CSV</button>
+      <button id="dl-md" class="secondary">Download review notes</button>
+
+      <div class="warn">
+        <h3 style="margin-top:0">Before you import — pick the right KTA</h3>
+        <p>CoinLedger will ask you to choose between <code>KTA - Keeta</code> and <code>KTA - KTA</code>.</p>
+        <p><strong>Choose <code>KTA - Keeta</code>.</strong></p>
+        <p>The other one is an unrelated coin. If you pick it, CoinLedger prices your entire report
+           against the wrong asset — with no error and no warning. CoinLedger can remember the choice,
+           so you only make it once.</p>
+      </div>
+
+      <h3>How to import</h3>
+      <ol>
+        <li>In CoinLedger, go to <strong>Import → Other Account</strong> and upload the CSV.</li>
+        <li>When it asks about shared tickers, choose <code>KTA - Keeta</code>.</li>
+        <li>Read the review notes below and check those rows before you file.</li>
+      </ol>
+
+      <div class="warn">
+        <h3 style="margin-top:0">About bridge transfers</h3>
+        <p>If you moved KTA to another chain, that shows up on Keeta as an ordinary send — it looks
+           exactly like a sale. We flag the bridges we can recognise, but <strong>we cannot detect all
+           of them</strong>: only two bridge operators publish their addresses in a way we can read.</p>
+        <p><strong>If you bridged KTA to Base or anywhere else, check those rows yourself.</strong>
+           A bridge you moved between your own wallets is usually not a taxable sale, but this file
+           cannot tell the difference on its own.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Review notes</h2>
+      <p class="note">Same content as the downloadable file. Please read it before filing.</p>
+      <div id="md-view"></div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ===================== BELOW THE FOLD ===================== -->
+  <h2>How this works, and what it never sees</h2>
+  <p>You paste a public address. Your browser talks straight to Keeta's own nodes, reads your
+     transaction history, and builds the CSV locally. The file is created in your browser and saved
+     by your browser.</p>
+  <p><strong>There is no server in the middle.</strong> We do not run a backend, we do not have a
+     database, and we never see your address. The only network requests this page makes are to
+     Keeta's nodes and to load the Keeta SDK. You can verify that yourself in your browser's
+     developer tools, Network tab.</p>
+  <p>It also never asks for a seed phrase or private key. It could not use one if you gave it one —
+     reading history only needs a public address.</p>
+  <p><strong>There is nothing to monetise here.</strong> No ads, no tracking, no analytics, no
+     affiliate links, no server. This page makes no money and collects nothing, which is the
+     simplest reason to believe the rest of it.</p>
+
+  <h2>Why only KTA?</h2>
+  <p>This version exports KTA only. If your wallet holds other Keeta tokens, those transactions are
+     <strong>detected and deliberately left out</strong>, and listed in your review notes.</p>
+  <p>That is a correctness decision, not a missing feature. Keeta does not publish a token's decimal
+     precision on-chain — every token we checked had empty metadata. Without that, a raw number could
+     mean <code>1.0</code> or <code>0.000000001</code>, and guessing wrong would put a silently wrong
+     figure in your tax return. We would rather leave a row out and tell you than quietly get it wrong.</p>
+
+  <h2>Read the code</h2>
+  <p>Don't trust us — read it. <a id="repo-link" href="#">GitHub repository</a> <span class="note">(link to be added)</span></p>
+
+  <div class="card">
+    <h3 style="margin-top:0">Disclaimer</h3>
+    <p class="note">This tool formats your on-chain transaction history for import into tax software.
+       It does not provide tax, legal, or financial advice. Transaction classifications are best-effort —
+       review every row before filing. You are responsible for the accuracy of your tax reporting.</p>
+  </div>
+
+</main>
+
+<!-- Keeta browser SDK. Verified to run with no polyfills (Gate 2 spike). -->
+<script src="https://static.network.keeta.com/keetanet-browser.js"></script>
+<!-- Shared logic, identical files used by the Node CLI. Order matters:
+     format defines parseUnits, which classify reads at load time. -->
+<script src="../lib/format.js"></script>
+<script src="../lib/classify.js"></script>
+<script src="../lib/pipeline.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

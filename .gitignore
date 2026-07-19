@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# ---------------------------------------------------------------------------
+# Generated output. NEVER COMMIT THIS DIRECTORY.
+#
+# It contains raw transaction history for real mainnet wallets — the dumps run
+# to 100MB+ each and hold hundreds of thousands of third-party addresses, plus
+# generated CSVs and review files with real transaction data. None of it is
+# ours to publish, and none of it is needed to run or audit the tool.
+# ---------------------------------------------------------------------------
+output/
+
+# Belt and braces: catch these anywhere, in case someone runs the tools from a
+# different working directory.
+*history-raw*.json
+raw-*.json
+coinledger-*.csv
+FLAGGED*.md
+
+# Local strategy/planning docs live OUTSIDE this repo by design (see README).
+# These patterns exist only to catch an accidental copy back in.
+keeta-tax-tool-project-plan.md
+keeta-sdk-research-findings.md
+
+# Local server / editor / OS noise
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+.env
+.env.*
