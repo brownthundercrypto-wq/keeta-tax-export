@@ -6,7 +6,7 @@ This file lists every transaction the converter could **not** classify with conf
 
 - Account: `keeta_aabva3ph7du7vxsjlixr3pgzxyvseizddgxzj7uwzixvvlv2tuewaquqkerc24i`
 - Network: main (network id 0x5382)
-- Generated: 2026-07-19T21:34:43.250Z
+- Generated: 2026-07-20T00:10:14.432Z
 - Staples fetched: 2008
 - Rows written to CSV: 1997
 - Excluded from CSV: 11
@@ -30,13 +30,23 @@ CoinLedger can remember this mapping, so it is a one-time choice per account.
 
 **Upload the CSV as it is. Do not open and re-save it first.**
 
-## ⚠️ 1990 rows use tokens CoinLedger cannot price
+## ⚠️ 1990 of your 1997 rows need a price you supply yourself
 
-Tokens affected: **MURF, CHTA, LUCKY, MKTA, LP_KTA_MURF**
+**Everything is included in your CSV. Some of it needs your attention. Here is exactly what, and how much.**
 
-CoinLedger only has price history for assets it already knows about. For anything else you have to add it as a **custom asset**, and then **enter the price yourself for every transaction, at every date**. There is no automatic pricing and no bulk lookup that fills it in for you.
+| Token | Rows |
+|---|---|
+| CHTA | 1 |
+| LP_KTA_MURF | 2 |
+| LUCKY | 2 |
+| MKTA | 1 |
+| MURF | 1984 |
 
-**1990 rows means 1990 prices to research and type in.** Decide whether that is worth it before you import. If it is not, you may prefer to import only the assets CoinLedger prices and handle these separately.
+CoinLedger has price history only for assets it already tracks. For these you add a **custom asset**, then supply the price yourself for each transaction at each date. There is no automatic lookup.
+
+**That is 1990 prices to enter, around 100% of your export.** That is a large manual job, and only you can judge whether it is worth doing. One option is to import the assets CoinLedger already prices, handle these separately, and ask an accountant how to treat tokens with no market price.
+
+Whatever you decide, **reconcile these against your own wallet before filing**. They are in the file. The tool cannot value them for you.
 
 ## How to import
 
@@ -44,19 +54,19 @@ CoinLedger only has price history for assets it already knows about. For anythin
 2. When prompted about shared tickers, select **`KTA - Keeta`** (see above).
 3. Review everything listed further down this file before filing.
 
-## About protocol fees
+## About network fees
 
-**Fee columns in the CSV are deliberately left blank.** Keeta reports a per-staple aggregate called `feeUnits`, but the unit it is denominated in is not documented and could not be verified. Interpreting it as KTA base units produces implausibly small values (a typical fee would be about 0.000000000000002 KTA), which strongly suggests it is a different unit entirely.
+**No network fees appear in this export.** Every transaction here had its fee paid by the other party, which is normal for incoming transfers and for swaps where the counterparty publishes the transaction.
 
-Across this export the raw `feeUnits` total was **8272860** across 2008 staples. Rather than write a number we cannot justify into a tax document, the tool omits it and tells you here.
-
-If your protocol fees are material to your filing, ask a professional how to treat them.
+You may also see a raw number called `feeUnits` if you go digging in the data. Ignore it. It measures how big a transaction is, not how much it cost, and it is not an amount of KTA.
 
 ## more than two tokens moved, so this is not a simple trade  (1)
 
-These moved **more than two tokens at once**, so they are not a simple swap of one thing for another.
+These moved **several tokens at once in a shape that is not a trade**, so they could not be written as one swap of one thing for another.
 
-The real example seen on-chain is a token launch: a new token is created and its supply issued in the same transaction, so several tokens arrive and none leave. That is not a trade, and forcing it into a trade row would misreport it. They are excluded and listed below.
+The real example seen on-chain is a token launch: a new token is created and its supply issued in the same transaction, so several tokens arrive and none leave. That is not a trade, and forcing it into a trade row would misreport it.
+
+Note that several tokens **leaving** at once is handled now: that is a transfer of each one, and those rows are in your CSV. What is left here is the cases that genuinely have no single sensible shape. They are excluded and listed below.
 
 | Staple hash | Date (UTC) | Detail |
 |---|---|---|

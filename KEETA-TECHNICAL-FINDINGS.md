@@ -354,15 +354,82 @@ SEND=0, SET_REP=1, SET_INFO=2, MODIFY_PERMISSIONS=3, CREATE_IDENTIFIER=4,
 TOKEN_ADMIN_SUPPLY=5, TOKEN_ADMIN_MODIFY_BALANCE=6, RECEIVE=7, MANAGE_CERTIFICATE=8
 ```
 
-Fees appear as a **staple-level aggregate**: `effects.metadata.feeUnits`
-(alongside `blockCount` and `operationCount`). They can also materialize as a
-separate fee block via `UserClientOptions.generateFeeBlock`.
+## `feeUnits` is a size metric, not a price
 
-**Open question:** the *unit* of `feeUnits` is undocumented and we could not
-verify it. Interpreting it as KTA base units yields implausible values. A
-typical fee would be ~0.000000000000002 KTA. The name (`feeUnits`, not
-`feeAmount`) hints at a distinct unit. If you need exact fees, confirm this
-before relying on it.
+An earlier version of this document listed the denomination of `feeUnits` as an
+open question. It is now answered, and the answer is that the question was the
+wrong one. **`feeUnits` is not an amount of any token.** It is a measure of how
+large a staple is, computed client side **[SOURCE]**:
+
+```
+feeUnits = 1000*blocks + 10000*openingBlocks + sum(perOperationUnits)
+
+perOperationUnits:
+  SEND 10, SET_REP 20, SET_INFO 100, MODIFY_PERMISSIONS 20,
+  CREATE_IDENTIFIER 200, TOKEN_ADMIN_SUPPLY 10,
+  TOKEN_ADMIN_MODIFY_BALANCE 10, RECEIVE 10, MANAGE_CERTIFICATE 100
+```
+
+Verified by recomputing it from block and operation counts on every staple of
+two mainnet wallets: **5,026 of 5,026 exact matches, zero mismatches** **[DATA]**.
+A 2-block, 5-SEND staple gives `2*1000 + 5*10 = 2050`. A 3-block, 10-operation
+swap gives `3100`.
+
+Do not convert it to KTA. There is no rate. Anything that treats it as a token
+amount is writing a transaction-size number where a currency amount belongs.
+
+## The real fee: one payment per vote, in a block of its own
+
+Fees are paid by a dedicated block. `UserClient.computeFeeBlock` **[SOURCE]**
+walks the staple's votes and emits one operation per vote:
+
+```js
+operations.push({
+    type: OperationType.SEND,
+    amount: selectedFee.amount,
+    to: selectedFee.payTo ?? vote.issuer,
+    token: selectedFee.token ?? baseToken
+});
+// sealed with:  purpose: BlockPurpose.FEE      // enum: GENERIC = 0, FEE = 1
+```
+
+Consequences worth knowing before you write any fee handling:
+
+**Identify fees structurally, never by size.** A fee leg is a SEND inside a
+block whose `purpose` is `FEE`. Every staple observed carries exactly one such
+block. No amount threshold is needed, which matters because the amounts look
+exactly like ordinary dust.
+
+**Check who owns the fee block.** Its `account` is whoever published the staple,
+which is not always you. On a swap wallet with 2,008 staples, **0** fee blocks
+belonged to the wallet itself: the counterparty published and paid. On an
+operator wallet, 3,016 of 3,018 were its own **[DATA]**.
+
+**The recipient is not the representative.** Fees go to
+`selectedFee.payTo ?? vote.issuer`, and representatives nominate a separate
+payout address. Across 5,026 staples and every block in them, KTA sent to a
+vote issuer: **zero** **[DATA]**. The payout addresses rotate, so a wallet with
+46 fee blocks showed 175 distinct fee recipients. If you test "did this go to a
+validator", you will conclude fees do not exist.
+
+Typical fee amounts are `1010` and `11010` size-units worth, matching a
+single-block single-SEND staple and the same plus an opening block.
+
+## The trap: fees look like a second disposal
+
+Fee legs also appear in `effects.accounts[ourKey].fields.balance` as ordinary
+negative entries, indistinguishable from a real transfer. So a plain USDC send
+nets to **two tokens negative, none positive**: the USDC, plus the base-token
+fee.
+
+If your classifier treats "one token out, one token in" as a trade and anything
+else as unclassifiable, that shape is silently rejected and a real disposal
+disappears from your output. **Observed 60 times across six unrelated public
+mainnet wallets**, in every case with the base-token leg exactly equal to the
+fee-block total.
+
+Remove the fee legs before netting. Match them on exact amount and exact
+counterparty, and treat the remainder as principal.
 
 ---
 

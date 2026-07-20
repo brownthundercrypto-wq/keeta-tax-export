@@ -320,7 +320,7 @@ console.log('CSV row shape (CoinLedger rejects 0 / N/A in unused columns)');
 	check('deposit leaves Asset Sent BLANK', deposit[2], '');
 	check('deposit leaves Amount Sent BLANK', deposit[3], '');
 	check('deposit fills Asset Received', deposit[4], 'KTA');
-	check('fee columns are blank (denomination unverified)', withdrawal[6] + withdrawal[7], '');
+	check('fee columns are blank when the staple carried no fee block', withdrawal[6] + withdrawal[7], '');
 	check('date has no ISO artifacts', /[TZ+]/.test(withdrawal[0]), false);
 	check('date format', withdrawal[0], '02/01/2026 10:00:00');
 }
@@ -340,12 +340,120 @@ console.log('Trade CSV row: both pairs on ONE row, Type blank');
 	check('Amount Sent filled', line[3], '24902188.797697885934532853');
 	check('Asset Received is the net-positive token', line[4], 'KTA');
 	check('Amount Received filled', line[5], '69.853');
-	check('Fee Currency blank', line[6], '');
-	check('Fee Amount blank', line[7], '');
+	check('Fee Currency blank when no fee block', line[6], '');
+	check('Fee Amount blank when no fee block', line[7], '');
 	check('Type is BLANK so CoinLedger infers a trade', line[8], '');
 	checkTrue('high-precision row is flagged, not rounded',
 		P.processHistory([staple({ balance: { [OTHER_TOKEN]: [entry(-24902188797697885934532853n, PEER)],
 			[KTA]: [entry(69853000000000000000n, PEER)] } }, { hash: 'T2' })], ctx).stats.highPrecisionRows === 1);
+}
+
+console.log('');
+console.log('Network fees are read from the fee block, never guessed from size');
+
+/*
+ * The fee block as the SDK builds it in computeFeeBlock: purpose FEE, owned by
+ * the payer, one SEND per vote, paid to a rotating payTo address that is NOT
+ * the representative's voting identity.
+ */
+const REP_PAYOUT = ['keeta_payto1', 'keeta_payto2', 'keeta_payto3', 'keeta_payto4'];
+const FEE_LEG = 1010000000000000n;      /* 1010 feeUnits, the observed constant */
+
+function feeBlock(amount = FEE_LEG, token = KTA, account = OUR_KEY) {
+	return ({
+		purpose: 1,
+		account: account,
+		network: '0x5382',
+		operations: REP_PAYOUT.map((to) => ({ type: 0, token: token, amount: amount, to: to }))
+	});
+}
+/* The matching balance entries the fee legs produce in effects. */
+function feeEntries(amount = FEE_LEG) {
+	return (REP_PAYOUT.map((to) => entry(-amount, to)));
+}
+
+{
+	/*
+	 * THE MULTI_LEG DEFECT, reproduced exactly.
+	 *
+	 * 1.5 USDC out plus 0.00404 KTA of fees. Before the fix this netted to
+	 * "two tokens out, none in", failed the trade test, and the whole staple
+	 * was dropped from the CSV -- a real disposal silently missing. Observed on
+	 * mainnet 60 times across six unrelated wallets.
+	 */
+	const r = classifyStaple(staple({
+		balance: {
+			[SIX_DP]: [entry(-1500000n, PEER)],
+			[KTA]: feeEntries()
+		}
+	}, { blocks: [feeBlock()] }), CTX);
+
+	check('a send plus its cross-token fee is a Withdrawal, not MULTI_LEG', r.kind, 'row');
+	check('  the disposal is the non-fee token', r.row.symbol, 'USDC');
+	check('  the amount is the principal, not the fee', formatUnits(r.row.amount, 6), '1.5');
+	check('  the fee is carried as KTA', r.row.fee ? r.row.fee.symbol : null, 'KTA');
+	check('  the fee is the exact sum of the fee block legs',
+		r.row.fee ? formatUnits(r.row.fee.amount, 18) : null, '0.00404');
+}
+{
+	/* Fee legs must not be mistaken for the principal on an ordinary send. */
+	const r = classifyStaple(staple({
+		balance: { [KTA]: [entry(-3n * 10n ** 18n, PEER)].concat(feeEntries()) }
+	}, { blocks: [feeBlock()] }), CTX);
+	check('same-token fee is split out of the principal', formatUnits(r.row.amount, 18), '3');
+	check('  and reported as a fee', r.row.fee ? formatUnits(r.row.fee.amount, 18) : null, '0.00404');
+}
+{
+	/* A fee block belonging to the COUNTERPARTY is not our expense. In a swap
+	 * the other side publishes the staple and pays. */
+	const r = classifyStaple(staple({
+		balance: { [KTA]: [entry(-3n * 10n ** 18n, PEER)] }
+	}, { blocks: [feeBlock(FEE_LEG, KTA, PEER)] }), CTX);
+	check('a fee block owned by someone else is ignored', r.row.fee, null);
+	check('  and does not touch our amount', formatUnits(r.row.amount, 18), '3');
+}
+{
+	/* Nothing moved but the fee. Excluded, but never silently. */
+	const r = classifyStaple(staple({
+		balance: { [KTA]: feeEntries() }
+	}, { blocks: [feeBlock()] }), CTX);
+	check('a fee-only staple is flagged, not dropped', r.reason, REASONS.FEE_ONLY);
+}
+{
+	/* Several tokens out and none in is a transfer of each, not a trade. */
+	const r = classifyStaple(staple({
+		balance: {
+			[SIX_DP]: [entry(-1500000n, PEER)],
+			[FIAT]: [entry(-2500n, PEER)],
+			[KTA]: feeEntries()
+		}
+	}, { blocks: [feeBlock()] }), CTX);
+	check('two real tokens out emits two rows', r.kind, 'rows');
+	check('  one row per disposal', r.rows.length, 2);
+	checkTrue('  the fee is attached to exactly one row',
+		r.rows.filter((x) => x.row.fee !== null).length === 1);
+}
+{
+	/* Tokens IN with none out stays flagged: a fee is always an outflow. */
+	const r = classifyStaple(staple({
+		balance: {
+			[SIX_DP]: [entry(1500000n, PEER)],
+			[FIAT]: [entry(2500n, PEER)]
+		}
+	}), CTX);
+	check('several tokens in with none out is still MULTI_LEG', r.reason, REASONS.MULTI_LEG);
+}
+{
+	/* The fee reaches the CSV columns. */
+	const { rows } = P.processHistory([staple({
+		balance: { [SIX_DP]: [entry(-1500000n, PEER)], [KTA]: feeEntries() }
+	}, { blocks: [feeBlock()] })], CTX);
+	const line = P.buildCsv(rows).split(String.fromCharCode(13, 10))[1].split(',');
+	check('CSV Asset Sent is the principal', line[2], 'USDC');
+	check('CSV Amount Sent is the principal', line[3], '1.5');
+	check('CSV Fee Currency is the fee asset', line[6], 'KTA');
+	check('CSV Fee Amount is exact', line[7], '0.00404');
+	check('CSV Type is Withdrawal', line[8], 'Withdrawal');
 }
 
 console.log('');
