@@ -321,6 +321,31 @@
 		const { stats } = result;
 		const out = [];
 
+		/*
+		 * FIRST, and never omitted. CoinLedger books every Type=Withdrawal as a
+		 * non-taxable self-transfer, so a sale or a payment sent on-chain lands
+		 * in the return as nothing at all. No error, no warning, from a CSV that
+		 * is technically correct. Same failure class as the shared KTA ticker.
+		 */
+		if (stats.outgoingRows > 0) {
+			out.push(
+				'<div class="warn"><h3 style="margin-top:0">Your ' + stats.outgoingRows +
+				' outgoing transaction' + (stats.outgoingRows === 1 ? ' is' : 's are') +
+				' marked non-taxable</h3>' +
+				'<p>Everything you sent out is exported as a <strong>Withdrawal</strong>. ' +
+				'CoinLedger treats a Withdrawal as moving money between two wallets you own, ' +
+				'so it reports no gain and no loss on any of them.</p>' +
+				'<p><strong>If any of those sends were sales or payments, that is wrong.</strong> ' +
+				'Selling by sending to a buyer is a disposal. Paying someone in crypto is a disposal. ' +
+				'Both look identical to an ordinary transfer on-chain, and left as Withdrawals they ' +
+				'will be missing from your return with no warning.</p>' +
+				'<p><strong>This tool cannot tell the difference and does not guess.</strong> ' +
+				'Only you know which sends were which. Change the type in CoinLedger to ' +
+				'<strong>Sells</strong> or <strong>Payments</strong> on any that were. ' +
+				'Gifts you can leave alone, they are non-taxable either way.</p></div>'
+			);
+		}
+
 		if (stats.unpriceableRows > 0) {
 			const syms = [...stats.unpriceableSymbols].filter(Boolean).join(", ");
 			out.push(
