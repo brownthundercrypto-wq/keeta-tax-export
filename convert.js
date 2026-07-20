@@ -144,7 +144,7 @@ async function main() {
 	console.log(`staples fetched:            ${stats.stapleCount}`);
 	console.log(`rows emitted to CSV:        ${stats.rowsEmitted}`);
 	console.log(`skipped (non-financial):    ${stats.skipped}`);
-	console.log(`excluded (needs review):    ${stats.excluded}`);
+	console.log(`not included in the CSV:    ${stats.excluded}`);
 	console.log('');
 	console.log('flagged by reason:');
 	for (const [reason, items] of groups) {

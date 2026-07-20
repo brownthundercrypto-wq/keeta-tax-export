@@ -281,9 +281,27 @@
 			: '<p><strong>No exportable rows were found for this address.</strong></p>';
 
 		const parts = [];
-		if (groups.size > 0) {
-			parts.push('<h3>Needs your review</h3><ul>');
-			for (const [reason, items] of groups) {
+		/*
+		 * Split mechanical exclusions from genuine judgement calls. Listing a
+		 * fee-only transaction under "needs your review" implied a decision the
+		 * user does not have: it is missing because a CSV row needs an asset and
+		 * amount, not because anything about it is uncertain.
+		 */
+		const excluded = [], review = [];
+		for (const [reason, items] of groups) {
+			(K.isExclusion(reason) ? excluded : review).push([reason, items]);
+		}
+		if (excluded.length > 0) {
+			parts.push('<h3>Not included in your file</h3>');
+			parts.push('<p class="note">No decision for you to make. Each is missing for a mechanical reason. Some are still real taxable events, and the review notes say which.</p><ul>');
+			for (const [reason, items] of excluded) {
+				parts.push(`<li><strong>${items.length}</strong>: ${mdInline(reason)}</li>`);
+			}
+			parts.push('</ul>');
+		}
+		if (review.length > 0) {
+			parts.push('<h3>In your file, but check these</h3><ul>');
+			for (const [reason, items] of review) {
 				parts.push(`<li><strong>${items.length}</strong>: ${mdInline(reason)}</li>`);
 			}
 			parts.push('</ul>');
