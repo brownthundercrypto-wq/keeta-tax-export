@@ -13,10 +13,13 @@ Everything marked **[DATA]** was verified against two **public, third-party
 mainnet addresses taken from the block explorer**. They are not the author's
 wallets, and no private wallet data was used at any point:
 
-| Address | Shape |
+| Address | What that WALLET did |
 |---|---|
-| `keeta_aab5qz62ifv77udwkziftaeea2isqk6v2qat27feoudcmcc5kw3uw2gu5kpk72i` | ~3,027 staples, KTA only, no swaps |
-| `keeta_aabva3ph7du7vxsjlixr3pgzxyvseizddgxzj7uwzixvvlv2tuewaquqkerc24i` | ~2,008 staples, 1,965 swaps, 9 tokens |
+| `keeta_aab5qz62ifv77udwkziftaeea2isqk6v2qat27feoudcmcc5kw3uw2gu5kpk72i` | ~3,027 staples; this wallet moved only KTA and never swapped |
+| `keeta_aabva3ph7du7vxsjlixr3pgzxyvseizddgxzj7uwzixvvlv2tuewaquqkerc24i` | ~2,008 staples; 1,965 swaps across 9 tokens |
+
+**These describe the test wallets, not the tool.** The tool handles multiple
+tokens and emits swaps as trade rows; the first wallet simply never did either.
 
 Both are visible to anyone on `explorer.keeta.com`. Reading history requires
 only a public address. No key material of any kind.

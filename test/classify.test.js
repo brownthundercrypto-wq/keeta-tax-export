@@ -9,8 +9,11 @@
  *     every incoming one. Using it as a direction flag inverts every deposit.
  *   - Real swaps net across a staple with the same token appearing on both
  *     sides, so per-entry rules misfire.
- *   - Keeta publishes no decimals for non-KTA tokens, so guessing a divisor is
- *     a silent 10^n error.
+ *   - Token decimals ARE published on-chain, in each token's info.metadata. An
+ *     earlier version of this comment said they were not, which was a bug in
+ *     how state() was read rather than a fact about the network. Guessing a
+ *     divisor is still a silent 10^n error, so an unresolvable token fails
+ *     loudly instead. See the BROKEN fixture below.
  *   - $JPY has 0 decimals, so "falsy means missing" corrupts it.
  *   - KTA is 18 decimals on mainnet and 9 on testnet.
  *

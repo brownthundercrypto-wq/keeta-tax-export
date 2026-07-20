@@ -124,7 +124,7 @@
 		if (!slot) { return; }
 		try {
 			const pkg = await (await fetch('../package.json')).json();
-			slot.textContent = 'v' + pkg.version + '.';
+			slot.textContent = 'v' + pkg.version + '. ';
 		} catch {
 			/* Never block the page on a cosmetic lookup, and never show a
 			 * version we cannot substantiate. */

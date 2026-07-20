@@ -90,8 +90,14 @@
     Version is filled in at runtime from package.json, the same file the tag is
     cut from. It was hardcoded once and drifted: the page still read v0.2.0
     after v0.2.1 shipped. One source of truth, no build step.
+
+    The span starts EMPTY on purpose. index.html and app.js are cached
+    independently by Pages (max-age=600), so there is a window where fresh
+    markup runs against a stale script. A visible placeholder would render as a
+    stray character during that window. Empty means the worst case is a missing
+    version, never a wrong or broken-looking one.
   -->
-  <p class="version"><span id="app-version">…</span> Tested against Keeta mainnet and
+  <p class="version"><span id="app-version"></span>Tested against Keeta mainnet and
      <code>@keetanetwork/keetanet-client</code> 0.18.3 on 19 July 2026.
      If you are reading this much later, check that the SDK has not moved.</p>
 

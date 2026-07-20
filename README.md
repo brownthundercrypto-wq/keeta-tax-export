@@ -10,10 +10,16 @@ account, no server.
 
 **Live tool:** https://brownthundercrypto-wq.github.io/keeta-tax-export/
 
-> **v0.2.0.** Tested against Keeta mainnet and `@keetanetwork/keetanet-client`
-> **0.18.3** on **19 July 2026**. If you are reading this much later, check that
-> the SDK has not moved. See
-> [KEETA-TECHNICAL-FINDINGS.md](KEETA-TECHNICAL-FINDINGS.md) for what was
+<!--
+  No version number here on purpose. It was hardcoded and drifted twice, and a
+  README cannot read package.json. The releases page is generated from the tags,
+  so it cannot go stale.
+-->
+> Tested against Keeta mainnet and `@keetanetwork/keetanet-client` **0.18.3** on
+> **19 July 2026**. If you are reading this much later, check that the SDK has
+> not moved. Current version:
+> [releases](https://github.com/brownthundercrypto-wq/keeta-tax-export/releases).
+> See [KEETA-TECHNICAL-FINDINGS.md](KEETA-TECHNICAL-FINDINGS.md) for what was
 > verified and how.
 
 ## What this does not do
@@ -159,8 +165,9 @@ before you file anything.
 ## Notes for other Keeta developers
 
 **[KEETA-TECHNICAL-FINDINGS.md](KEETA-TECHNICAL-FINDINGS.md)** documents what was
-learned building this, including seven places where published documentation
-disagrees with the shipped SDK or live systems.
+learned building this, including **eight** places where published documentation
+disagrees with the shipped SDK or live systems: seven in Keeta's own docs, and
+one in CoinLedger's.
 
 Short version, if you are reading Keeta history yourself:
 
