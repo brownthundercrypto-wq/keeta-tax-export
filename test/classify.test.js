@@ -457,6 +457,49 @@ function feeEntries(amount = FEE_LEG) {
 }
 
 console.log('');
+console.log('Anchor wording must match what the account declares, not what we assume');
+
+{
+	/*
+	 * A registry-listed BRIDGE may be described as a possible bridge. A merely
+	 * self-declared anchor may not: "KYC Test Anchor Root" is a real mainnet
+	 * account that matches anchor detection and is not a bridge at all. Telling
+	 * someone a KYC check was a possible bridge invites them to mark a genuine
+	 * disposal as a non-taxable self-transfer.
+	 */
+	const KYC = 'keeta_kycanchorroot00000000000000000000000000000000000000000000';
+	const ctx = Object.assign({}, CTX, {
+		anchors: new Map([[KYC, {
+			address: KYC, isAnchor: true, checked: true,
+			name: null, description: 'KYC Test Anchor Root'
+		}]])
+	});
+
+	const bridged = classifyStaple(staple({
+		balance: { [KTA]: [entry(-2n * 10n ** 18n, BRIDGE)] }
+	}), ctx);
+	check('a registry bridge is flagged as a possible bridge',
+		bridged.flags.some((f) => f.reason === REASONS.POSSIBLE_BRIDGE), true);
+
+	const declared = classifyStaple(staple({
+		balance: { [KTA]: [entry(-2n * 10n ** 18n, KYC)] }
+	}), ctx);
+	check('a self-declared anchor is NOT called a bridge',
+		declared.flags.some((f) => f.reason === REASONS.POSSIBLE_BRIDGE), false);
+	check('  it gets its own reason instead',
+		declared.flags.some((f) => f.reason === REASONS.DECLARED_ANCHOR), true);
+
+	const { rows } = P.processHistory([staple({
+		balance: { [KTA]: [entry(-2n * 10n ** 18n, KYC)] }
+	}, { hash: 'KYC1' })], ctx);
+	const desc = P.buildDescription(rows[0]);
+	checkTrue('  the row description quotes the account’s own words',
+		desc.includes('KYC Test Anchor Root'), desc);
+	checkTrue('  and never asserts it was a bridge',
+		!/bridge/i.test(desc), desc);
+}
+
+console.log('');
 if (failures > 0) {
 	console.log(`FAILED - ${failures} assertion(s)`);
 	process.exit(1);
