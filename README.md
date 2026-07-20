@@ -65,8 +65,11 @@ This is the part that matters, so it is stated plainly.
 - **It cannot use a seed phrase or private key.** Reading history needs only a
   public address. Paste something that looks like a seed and the tool refuses it
   and tells you why.
-- **Nothing is monetized.** No ads, no tracking, no analytics, no affiliate
-  links, no server. This project makes no money and collects nothing.
+- **There is no server, so there is nothing that could log anything.** Not "we
+  choose not to keep logs" — there is no backend and no database for a request
+  to reach in the first place.
+- **Nothing is monetized.** No ads, no tracking, no analytics, no server. This
+  project makes no money and collects nothing.
 
 You do not have to take any of that on trust. Open your browser's developer
 tools, Network tab, and run it: the only origins contacted are
