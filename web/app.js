@@ -192,10 +192,14 @@
 				(done, total) => { el.pStatus.textContent = `Checking recipients for bridges… ${done}/${total}`; }
 			);
 
+			el.pStatus.textContent = 'Reading transfer instructions…';
+			const payloads = await K.prefetchPayloads(history);
+
 			const ctx = {
 				ourKey: publicKey,
 				baseToken: baseToken,
 				anchors: anchors,
+				payloads: payloads,
 				baseTokenSymbol: net.baseTokenSymbol,
 				baseTokenDecimals: net.baseTokenDecimals,
 				bridgeAnchors: bridgeAnchors,

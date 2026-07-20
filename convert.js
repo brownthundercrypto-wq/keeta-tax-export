@@ -115,10 +115,16 @@ async function main() {
 		console.log(`  !! ${unreadable.length} counterparty(ies) could not be read; reported as unchecked, never as clean`);
 	}
 
+	/* Decode anchor instructions up front so classification stays synchronous
+	 * and identical to the browser's. */
+	const payloads = await P.prefetchPayloads(history);
+	console.log(`decoded anchor instructions on ${payloads.size} staple(s)`);
+
 	const ctx = {
 		ourKey: publicKey,
 		baseToken: baseToken,
 		anchors: anchors,
+		payloads: payloads,
 		baseTokenSymbol: net.baseTokenSymbol,
 		baseTokenDecimals: net.baseTokenDecimals,
 		bridgeAnchors: bridgeAnchors,
