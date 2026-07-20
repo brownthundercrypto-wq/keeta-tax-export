@@ -26,10 +26,12 @@ against the installed package · **[DOCS]** = documentation claim, unverified.
 
 ---
 
-# 1. Documentation vs. reality: seven discrepancies
+# 1. Documentation vs. reality: eight discrepancies
 
-Published documentation disagreed with the shipped code or live systems **seven
-times**. This is the single most useful thing in this document.
+Published documentation disagreed with the shipped code or live systems **eight
+times**: seven for Keeta, plus one for CoinLedger's CSV template, which is a
+different ecosystem and exactly the same lesson. This is the single most useful
+thing in this document.
 
 **Treat documentation as hypothesis and `node_modules` as truth.** Verify before
 relying on any doc claim.
@@ -131,6 +133,19 @@ present in the real Google Sheet template. **CoinLedger fingerprints the entire
 header row before parsing any data**, so the wrong header rejects the whole file
 with no indication of which column was at fault. The template is the source of
 truth, not the article.
+
+### 8. Anchors are documented as mint/burn. On Base it is lock/unlock
+
+[docs.keeta.com/features/anchors](https://docs.keeta.com/features/anchors) describes foreign assets as being minted and burned. That is true of the **Keeta side** and false of the **EVM side**, and the distinction matters if you are reasoning about supply or reconciling the two chains.
+
+**[DATA]**, from reading both chains:
+
+- **On Keeta**, an inbound bridge really is a mint. The token account itself executes `TOKEN_ADMIN_SUPPLY` for the exact amount, sends it to the anchor, and the anchor forwards it to the user. Three operations, two blocks.
+- **On Base**, there is no minting at all. A 24h scan of 2,619 KTA `Transfer` logs found **zero** mints (`from` = `0x0`) and **zero** burns (`to` = `0x0`). Supply is fixed at 1,000,000,000. Arrivals are ordinary transfers out of a custody contract.
+
+The two sides tie out: the Base bridge contract's KTA balance (8,202,711.76) tracks Keeta L1 KTA `supply` (8,202,617.35) roughly 1:1. Keeta-side supply is minted and burned against Base-side locked custody.
+
+**Why it matters:** if you take the doc at face value and look for mint/burn events on Base to identify bridge activity, you will find none and conclude no bridging occurs. The signal is a transfer from the custody contract, not a mint.
 
 ---
 
