@@ -1,11 +1,11 @@
 {
   "name": "keeta-tax-tool",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Export Keeta (KTA) transaction history to tax-ready CSV. Public key only, client-side.",
   "main": "spike-history.js",
   "scripts": {
     "spike": "node spike-history.js",
-    "test": "node test/header.test.js && node test/classify.test.js"
+    "test": "node test/parse.test.js && node test/header.test.js && node test/classify.test.js"
   },
   "keywords": [],
   "author": "",

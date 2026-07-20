@@ -119,7 +119,16 @@
 	 * Hardcoding it in the markup drifted once already, leaving the deployed
 	 * page claiming v0.2.0 after v0.2.1 had shipped.
 	 */
-	(async () => {
+	/*
+	 * NOTE the shape: `(async function () { ... }());`
+	 *
+	 * The rest of this file uses `(function () { ... }())`, and that trailing
+	 * `}())` is only valid for a function EXPRESSION. An arrow written the same
+	 * way, `(async () => { ... }())`, is a SyntaxError, because the arrow body
+	 * swallows the invocation parens. Pattern-matching the surrounding style
+	 * onto an arrow shipped a file that would not parse.
+	 */
+	(async function () {
 		const slot = document.getElementById('app-version');
 		if (!slot) { return; }
 		try {
