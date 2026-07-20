@@ -98,9 +98,27 @@ async function main() {
 		console.log(`  ${(t.symbol || addr.slice(0, 18)).padEnd(14)} ${tag}`);
 	}
 
+	/*
+	 * Ask the chain what each payee says it is. The shipped registry missed the
+	 * only bridge with observed traffic, so it cannot be the ceiling on
+	 * detection. See lib/anchors.js.
+	 */
+	const outgoing = P.collectOutgoingCounterparties(history, publicKey);
+	console.log(`checking ${outgoing.length} outgoing counterparty(ies) for anchor self-declaration…`);
+	const anchors = await P.prefetchAnchors(client, KeetaNetLib.Account, history, publicKey, bridgeAnchors);
+	const discovered = [...anchors.values()].filter((a) => a.isAnchor);
+	const unreadable = [...anchors.values()].filter((a) => a.checked === false);
+	for (const a of discovered) {
+		console.log(`  ANCHOR: ${a.address.slice(0, 18)}…  name=${JSON.stringify(a.name)} desc=${JSON.stringify(a.description)}`);
+	}
+	if (unreadable.length > 0) {
+		console.log(`  !! ${unreadable.length} counterparty(ies) could not be read; reported as unchecked, never as clean`);
+	}
+
 	const ctx = {
 		ourKey: publicKey,
 		baseToken: baseToken,
+		anchors: anchors,
 		baseTokenSymbol: net.baseTokenSymbol,
 		baseTokenDecimals: net.baseTokenDecimals,
 		bridgeAnchors: bridgeAnchors,

@@ -433,7 +433,65 @@ counterparty, and treat the remainder as principal.
 
 ---
 
-# 7. Smaller things worth knowing
+# 7. Identifying anchors: read `info.name`, do not trust the metadata endpoint
+
+If you need to know whether an address is a bridge or anchor, the obvious source
+is the service-discovery metadata at `static.network.keeta.com/metadata/services`.
+**It is incomplete for this purpose, and the gap is not small.**
+
+We enumerated every `keeta_` address in that endpoint and got two bridge
+anchors. Then we checked real traffic across eight mainnet wallets **[DATA]**:
+
+| | traffic observed |
+|---|---|
+| the two metadata-declared bridge anchors | **0 sends** |
+| `EVM_ANCHOR`, absent from the endpoint | **98 outgoing legs**, in 6 of 6 wallets |
+
+Every sampled wallet that sent a non-KTA token bridged through the address the
+endpoint does not list. The two it does list saw nothing at all.
+
+## Anchors self-declare on-chain
+
+The reliable source is the account itself. The same `client.state()` call used
+for token decimals returns `info.name` and `info.description` **[DATA]**:
+
+```js
+const st   = await client.state({ account });
+const info = st.info;              // NOTE: st.info, not st
+info.name;                         // "EVM_ANCHOR"
+info.description;                  // "EVM Anchor Bridge Account"
+```
+
+That is where the explorer's labels come from too. It is rendering `info`, not
+consulting a registry.
+
+Scanning counterparties this way also surfaced a **"KYC Test Anchor Root"** that
+appears in no registry. So the technique generalizes past bridges: anchors of
+several kinds announce themselves, and nothing else reliably lists them.
+
+## What this means if you are building on Keeta
+
+- **Do not treat service-discovery metadata as the set of anchors.** It is a set
+  of *services that registered*, which is a different thing and, on current
+  evidence, a much smaller one.
+- **Read `info.name` and `info.description` on the counterparty.** It costs one
+  call per distinct address and is cacheable.
+- **Match on words, not exact strings.** `EVM_ANCHOR` uses an underscore and
+  `KYC Test Anchor Root` uses spaces. Normalize separators before matching.
+- **A non-match is not a negative result.** An account can be a bridge and say
+  nothing. Absence of a declaration proves nothing, so do not report it as
+  "confirmed not a bridge".
+- **Not every anchor is a bridge.** A KYC anchor and a storage anchor both match
+  the word. If the distinction matters, show the user the self-declared text
+  rather than your own label for it.
+
+For a tax tool the stakes are concrete: a bridge transfer is often a movement
+between the user's own holdings and not a disposal at all, but on-chain it is an
+ordinary send. Missing it reports a taxable event that never happened.
+
+---
+
+# 8. Smaller things worth knowing
 
 **`publicKeyString` is an object, not a string.** `String()`, template literals,
 and `.get()` all work and are equivalent. **`JSON.stringify` yields `{}`**.

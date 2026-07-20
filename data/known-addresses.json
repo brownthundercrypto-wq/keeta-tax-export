@@ -32,6 +32,16 @@
       "sourcePath": ".assetMovement.keeta.account",
       "verified": true,
       "note": "Declared as the anchor account for the 'keeta' assetMovement service. Bridges to Base/EVM per its locationMetadata."
+    },
+    {
+      "address": "keeta_aqltdal4rshtky5iehd765y3mdjkcmku5d4ulo5fgonzqrxulwepnogq33mle",
+      "name": "EVM_ANCHOR",
+      "type": "assetMovement",
+      "source": "observed-onchain",
+      "verified": true,
+      "onChainName": "EVM_ANCHOR",
+      "onChainDescription": "EVM Anchor Bridge Account",
+      "note": "FOUND BY OBSERVING COUNTERPARTY TRAFFIC, NOT THE METADATA ENDPOINT. This address returns zero occurrences at static.network.keeta.com/metadata/services, so the Gate 3 enumeration could not see it. It was found by scanning the counterparties of ordinary wallets, then reading its own account info on-chain, where it self-declares name 'EVM_ANCHOR' and description 'EVM Anchor Bridge Account'. Verified:true rests on that on-chain self-declaration, which is stronger evidence than a third-party registry entry. It is also the ONLY bridge with observed traffic: 98 outgoing legs across six unrelated public wallets, versus zero for both metadata-declared anchors."
     }
   ],
   "otherAnchors": [
@@ -203,8 +213,10 @@
     }
   ],
   "_limitations": [
-    "This list is NOT exhaustive and cannot be. Only TWO bridge anchors are registry-declared. Any bridge operating outside the live metadata endpoint is invisible to us.",
-    "A send to an address NOT on this list is therefore NOT evidence that it was not a bridge. The absence of a match must never be reported to the user as 'confirmed not a bridge'.",
+    "This list is NOT exhaustive and cannot be.",
+    "PROVEN, not theoretical: the live metadata endpoint is INCOMPLETE as a bridge source. Gate 3 built this list by enumerating keeta_ addresses in static.network.keeta.com/metadata/services. That method found two anchors with ZERO observed traffic, and MISSED the EVM_ANCHOR, which carries 98 outgoing legs across six unrelated public wallets and is used by every sampled wallet that sends a non-KTA token. Service-discovery metadata is not the same set as 'accounts that behave as bridges'.",
+    "A send to an address NOT on this list is therefore NOT evidence that it was not a bridge. The absence of a match must never be reported to the user as 'confirmed not a bridge'. For 98 real bridge transfers this list, as originally built, said nothing at all.",
+    "Because of that, registry matching is no longer the ceiling on detection: lib/anchors.js also reads each outgoing counterparty's own on-chain info.name and info.description and flags anchor-like self-declaration even when the address is absent from this file. This list remains useful for naming and for verified provenance, but it is a floor, not a limit.",
     "Consequently the pattern-based fallback in the spec is mandatory, not optional: v1 must tell the user plainly that bridge detection is best-effort."
   ],
   "_exclusionNote": "No token is excluded outright. Tokens with priceable:false are exported but CoinLedger has no price data for them, so they need a custom asset and manual historical pricing per transaction.",

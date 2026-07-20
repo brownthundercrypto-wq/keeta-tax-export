@@ -186,9 +186,16 @@
 				(done, total) => { el.pStatus.textContent = `Reading token details… ${done}/${total}`; }
 			);
 
+			el.pStatus.textContent = 'Checking recipients for bridges…';
+			const anchors = await K.prefetchAnchors(
+				client, globalThis.KeetaNet.lib.Account, history, publicKey, bridgeAnchors,
+				(done, total) => { el.pStatus.textContent = `Checking recipients for bridges… ${done}/${total}`; }
+			);
+
 			const ctx = {
 				ourKey: publicKey,
 				baseToken: baseToken,
+				anchors: anchors,
 				baseTokenSymbol: net.baseTokenSymbol,
 				baseTokenDecimals: net.baseTokenDecimals,
 				bridgeAnchors: bridgeAnchors,
