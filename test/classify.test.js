@@ -460,6 +460,33 @@ function feeEntries(amount = FEE_LEG) {
 }
 
 console.log('');
+console.log('A row with no asset must never reach the CSV');
+
+{
+	/*
+	 * Tested by real import: a row with blank Sent AND blank Received makes
+	 * CoinLedger reject the WHOLE FILE, not just that row. 0 transactions
+	 * imported, and a valid row earlier in the same file did not import either.
+	 * So one fee-only transaction would destroy a user's entire export.
+	 */
+	let threw = null;
+	try {
+		P.buildCsv([{
+			stapleHash: 'FEEONLY', timestamp: new Date('2026-06-15T12:00:00Z'),
+			kind: 'transfer', direction: 'out', type: 'Withdrawal',
+			token: KTA, symbol: '', decimals: 18, amount: 0n,
+			counterparties: [], fee: { token: KTA, symbol: 'KTA', decimals: 18, amount: 4040000000000000n },
+			memo: null, appliedFlags: []
+		}]);
+	} catch (e) { threw = e.message; }
+
+	checkTrue('buildCsv refuses a row with no asset in Sent or Received',
+		threw !== null && /no asset in Sent or Received/.test(threw), String(threw));
+	checkTrue('  and says why it matters (whole file, not just the row)',
+		threw !== null && /entire file/.test(threw), String(threw));
+}
+
+console.log('');
 console.log('Anchor wording must match what the account declares, not what we assume');
 
 {

@@ -137,6 +137,35 @@ header row before parsing any data**, so the wrong header rejects the whole file
 with no indication of which column was at fault. The template is the source of
 truth, not the article.
 
+### 7b. CoinLedger rejects the WHOLE FILE if any row has no asset
+
+Not a Keeta finding, but useful to anyone building a CoinLedger exporter, and it
+cost a test import to establish because no documentation covers it.
+
+**Every row must carry an asset and amount in `Asset Sent`/`Amount Sent` or
+`Asset Received`/`Amount Received`.** A row with both sides blank, even with
+valid `Fee Currency` and `Fee Amount`, is rejected **[DATA]**:
+
+```
+Unexpected transaction type "OutgoingCurrency: NULL | OutgoingAmount: NULL |
+IncomingCurrency: NULL | IncomingAmount: NULL" on item 2. Please message support
+and we will help get it resolved.
+```
+
+**The rejection is file-level.** `0 transactions imported, 1 account failed`. A
+known-good row earlier in the same file did not import either. One bad row
+destroys the entire export.
+
+This matters if your chain has fee-only events, which Keeta does: a transaction
+can pay a network fee while moving nothing, typically when publishing a block on
+behalf of another account. There is no way to express that as a CoinLedger row.
+Fees ride along on a row that has an asset, or they do not go in the file.
+
+Worth knowing that fees themselves are handled well: they are processed on
+`Deposit` and `Withdrawal` rows, not just trades, and a fee in an asset that
+appears in neither column is accepted. It is the *absence of any asset* that is
+fatal, not the fee.
+
 ### 8. Anchors are documented as mint/burn. On Base it is lock/unlock
 
 [docs.keeta.com/features/anchors](https://docs.keeta.com/features/anchors) describes foreign assets as being minted and burned. That is true of the **Keeta side** and false of the **EVM side**, and the distinction matters if you are reasoning about supply or reconciling the two chains.
