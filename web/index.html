@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- viewport-fit=cover is required for env(safe-area-inset-*) to report real
+     values on notched iPhones. Without it the header runs under the status bar. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="canonical" href="https://brownthundercrypto-wq.github.io/keeta-tax-export/">
 <title>Keeta Tax Export: CSV for CoinLedger</title>
 <style>
   :root {
@@ -21,7 +24,11 @@
   body {
     margin: 0; background: var(--bg); color: var(--fg);
     font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    padding: 24px 16px 64px;
+    /* Clear the iPhone status bar and home indicator. env() resolves to 0 where
+       there is no inset, so desktop spacing is unchanged. Requires
+       viewport-fit=cover on the viewport meta to report real values. */
+    padding: calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+             calc(64px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
   }
   main { max-width: 780px; margin: 0 auto; }
   h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
@@ -47,9 +54,20 @@
   .bad { background: var(--bad-bg); border: 1px solid var(--bad-line); border-radius: 8px; padding: 14px; margin: 14px 0; }
   .hidden { display: none; }
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 14px 0; }
-  .stat { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  /* min-width:0 lets a grid item shrink below its content width. Without it a
+     long amount forces the card wider than its column and overlaps the next
+     one, which is what TOTAL OUT was doing to TOTAL IN on a narrow screen. */
+  .stat { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-width: 0; }
   .stat .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-  .stat .v { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  /* An 18-decimal token produces amounts far longer than any card. Break them
+     rather than overflow, and step the size down where space is tightest. The
+     exact value is always in the CSV; this is a summary. */
+  .stat .v { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums;
+             min-width: 0; overflow-wrap: anywhere; word-break: break-word; line-height: 1.25; }
+  @media (max-width: 420px) {
+    .stats { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    .stat .v { font-size: 16px; }
+  }
   code, .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .92em; }
   .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
@@ -68,7 +86,12 @@
 
   <h1>Keeta Tax Export</h1>
   <p class="sub">Turn your Keeta (KTA) transaction history into a CSV you can import into CoinLedger. Runs entirely in your browser.</p>
-  <p class="version">v0.2.0. Tested against Keeta mainnet and
+  <!--
+    Version is filled in at runtime from package.json, the same file the tag is
+    cut from. It was hardcoded once and drifted: the page still read v0.2.0
+    after v0.2.1 shipped. One source of truth, no build step.
+  -->
+  <p class="version"><span id="app-version">…</span> Tested against Keeta mainnet and
      <code>@keetanetwork/keetanet-client</code> 0.18.3 on 19 July 2026.
      If you are reading this much later, check that the SDK has not moved.</p>
 

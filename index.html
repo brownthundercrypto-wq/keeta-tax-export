@@ -12,7 +12,12 @@
   This file exists only so the bare repository URL lands somewhere useful.
 -->
 <meta http-equiv="refresh" content="0; url=./web/">
-<link rel="canonical" href="./web/">
+<!--
+  Canonical is THIS url, not ./web/. The tool is served from /web/ so it can
+  load ../lib/*.js, but the address people are given is the repository root.
+  Pointing canonical at ./web/ told crawlers the opposite.
+-->
+<link rel="canonical" href="https://brownthundercrypto-wq.github.io/keeta-tax-export/">
 <style>
   body { font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
          max-width: 40rem; margin: 4rem auto; padding: 0 1rem; }

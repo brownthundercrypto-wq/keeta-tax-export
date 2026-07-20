@@ -114,6 +114,24 @@
 		return (() => { window.fetch = original; });
 	}
 
+	/*
+	 * Version comes from package.json, the file the release tag is cut from.
+	 * Hardcoding it in the markup drifted once already, leaving the deployed
+	 * page claiming v0.2.0 after v0.2.1 had shipped.
+	 */
+	(async () => {
+		const slot = document.getElementById('app-version');
+		if (!slot) { return; }
+		try {
+			const pkg = await (await fetch('../package.json')).json();
+			slot.textContent = 'v' + pkg.version + '.';
+		} catch {
+			/* Never block the page on a cosmetic lookup, and never show a
+			 * version we cannot substantiate. */
+			slot.textContent = '';
+		}
+	}());
+
 	function download(filename, text, mime) {
 		const blob = new Blob([text], { type: mime });
 		const url = URL.createObjectURL(blob);
