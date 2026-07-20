@@ -287,24 +287,32 @@
 		 * user does not have: it is missing because a CSV row needs an asset and
 		 * amount, not because anything about it is uncertain.
 		 */
-		const excluded = [], review = [];
+		const excluded = [], confirmed = [], review = [];
 		for (const [reason, items] of groups) {
-			(K.isExclusion(reason) ? excluded : review).push([reason, items]);
+			const b = K.isExclusion(reason) ? excluded : (K.isConfirmed(reason) ? confirmed : review);
+			b.push([reason, items]);
 		}
+		const list = (rows) => {
+			parts.push('<ul>');
+			for (const [reason, items] of rows) {
+				parts.push(`<li><strong>${items.length}</strong>: ${mdInline(reason)}</li>`);
+			}
+			parts.push('</ul>');
+		};
 		if (excluded.length > 0) {
 			parts.push('<h3>Not included in your file</h3>');
-			parts.push('<p class="note">No decision for you to make. Each is missing for a mechanical reason. Some are still real taxable events, and the review notes say which.</p><ul>');
-			for (const [reason, items] of excluded) {
-				parts.push(`<li><strong>${items.length}</strong>: ${mdInline(reason)}</li>`);
-			}
-			parts.push('</ul>');
+			parts.push('<p class="note">No decision for you to make. Each is missing for a mechanical reason. Some are still real taxable events, and the review notes say which.</p>');
+			list(excluded);
+		}
+		if (confirmed.length > 0) {
+			parts.push('<h3>What we could confirm</h3>');
+			parts.push('<p class="note">Read from the transaction itself, not guessed. In your file already.</p>');
+			list(confirmed);
 		}
 		if (review.length > 0) {
-			parts.push('<h3>In your file, but check these</h3><ul>');
-			for (const [reason, items] of review) {
-				parts.push(`<li><strong>${items.length}</strong>: ${mdInline(reason)}</li>`);
-			}
-			parts.push('</ul>');
+			parts.push('<h3>Needs your judgement</h3>');
+			parts.push('<p class="note">In your file, but we could not establish what they were.</p>');
+			list(review);
 		}
 		if (stats.grossFlowSuppressed > 0) {
 			parts.push(`<p class="note">${stats.grossFlowSuppressed} transactions had an opposing amount too small to appear in a tax report at all; these are counted but not listed.</p>`);

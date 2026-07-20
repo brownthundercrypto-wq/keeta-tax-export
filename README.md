@@ -102,10 +102,14 @@ before you download, so you can judge the work before taking it on.
 decimals. Map it as a distinct asset. Mapping it to BTC prices it against
 Bitcoin and merges the holdings.
 
-**Bridge detection is partial.** Moving KTA to another chain looks exactly like
-a sale on-chain. Known bridge addresses are flagged, but only two bridge
-operators publish their addresses in a readable way. **If you bridged KTA, check
-those rows yourself.**
+**Bridge detection is partial.** Moving crypto to another chain looks exactly
+like a sale on-chain. Bridges are recognised three ways: a list of known
+addresses, the recipient's own on-chain description, and the transfer
+instruction the transaction carries, which often names the destination chain and
+address. **None of that catches everything.** A bridge that is on no list,
+describes itself as nothing, and attaches no instruction is invisible. **A
+transfer we did not flag is not evidence it was not a bridge, so check those
+rows yourself.**
 
 **This is not tax advice.** Classifications are best-effort. Review every row
 before filing. You are responsible for the accuracy of your return.

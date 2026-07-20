@@ -178,10 +178,14 @@
 
       <div class="warn">
         <h3 style="margin-top:0">About bridge transfers</h3>
-        <p>If you moved KTA to another chain, that shows up on Keeta as an ordinary send. It looks
-           exactly like a sale. We flag the bridges we can recognize, but <strong>we cannot detect
-           all of them</strong>. Only two bridge operators publish their addresses in a way we can
-           read.</p>
+        <p>If you moved crypto to another chain, that shows up on Keeta as an ordinary send. It
+           looks exactly like a sale. We recognize bridges three ways: a list of known bridge
+           addresses, reading what each recipient says it is on-chain, and reading the transfer
+           instruction the transaction carries, which often names the destination chain and
+           address.</p>
+        <p><strong>None of that can promise we caught them all.</strong> A bridge that is not on our
+           list, does not describe itself, and attaches no instruction is invisible to us. A
+           transfer we did not flag is not proof it was not a bridge.</p>
         <p><strong>If you bridged KTA to Base or anywhere else, check those rows yourself.</strong>
            A bridge you moved between your own wallets is usually not a taxable sale, but this file
            cannot tell the difference on its own.</p>
